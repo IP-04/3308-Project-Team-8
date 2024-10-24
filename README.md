@@ -13,3 +13,6 @@ Isaias Perez, Ryan O'Leary, Zach Dyre, Zariyat Hossain, Abdirahman Ebiso
 # Prerequisites to run the application
 
 # Instructions on how to run the application locally
+
+# How to run the tests
+
