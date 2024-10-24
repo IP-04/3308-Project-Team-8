@@ -13,7 +13,7 @@ Isaias Perez, Ryan O'Leary, Zach Dyre, Zariyat Hossain, Abdirahman Ebiso
 
 ## Instructions on how to run the application locally
 
-# How to run the tests
+## How to run the tests
 
-# Link to the deployed application
+## Link to the deployed application
 
