@@ -1,0 +1,20 @@
+ISSUES
+* difficulty covering project blindspots, i.e. features we haven't considered
+    - coordinating ideas between ourselves
+
+* want to make pages look consistent with stylesheet
+
+
+* Logistics are a concern
+    - make sure everyone is on the same pages
+    - github branching working properly
+    - first group project utilizing these industry practices 
+        - look into locking main branch?
+
+GOALS
+* finish basic html pages
+    - then move on to implenting page to database communication
+
+* plan to finish front end this week
+    - add database skeleton, first table iterations
+    - limited by no API implementation for now
