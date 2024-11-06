@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/resources/css/style.css">
+</head>
+<body class="bg-light">
+
+    <header class="bg-primary">
+        <nav>
+            <ul>
+                <li><a href="/" class="text-light">Home</a></li>
+                <li><a href="/profile" class="text-light">Profile</a></li>
+                <li><a href="/logout" class="text-light">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="profile-header bg-shade">
+            <h1 class="text-light">{{user.name}}'s Profile</h1>
+            <p class="text-light">Welcome to your profile page!</p>
+        </div>
+
+        <div class="profile-content">
+            <section class="reviews">
+                <h2 class="text-primary">User Reviews</h2>
+                {{#if reviews.length}}
+                    <ul>
+                        {{#each reviews}}
+                            <li>
+                                <strong>{{this.title}}</strong> - {{this.date}}
+                                <p>{{this.reviewText}}</p>
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="text-shade">No reviews yet!</p>
+                {{/if}}
+            </section>
+
+            <section class="genres">
+                <h2 class="text-primary">Favorite Genres</h2>
+                {{#if genres.length}}
+                    <ul>
+                        {{#each genres}}
+                            <li class="bg-dark text-light">{{this}}</li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="text-shade">No favorite genres listed yet!</p>
+                {{/if}}
+            </section>
+
+            <section class="friends">
+                <h2 class="text-primary">Friend Activity</h2>
+                {{#if friends.length}}
+                    <ul>
+                        {{#each friends}}
+                            <li>
+                                <strong>{{this.name}}</strong> - {{this.activity}} <span class="text-secondary">({{this.timeAgo}})</span>
+                            </li>
+                        {{/each}}
+                    </ul>
+                {{else}}
+                    <p class="text-shade">No friend activity available!</p>
+                {{/if}}
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-secondary">
+        <p class="text-light">© 2024 Beehive | All Rights Reserved</p>
+    </footer>
+
+</body>
+</html>
