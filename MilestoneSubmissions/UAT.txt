@@ -1,3 +1,25 @@
+#UAT Plans 
+
+
+##Feature: Reccomendation Algorithm-
+Test Case: 
+User who has no friends or likes will not be shown any reccomendations
+
+Test Description(localhost):
+User Joe: logins in 
+Displays: No(as in zero) Friends or likes in books
+Navigate towards recommendation section
+
+Test Results: Shows zero or no under recommendations for Joe
+
+#6 ??
+
+
+##Feature: Display Book info-
+Test Case: 
+User will click on Book info & see discription
+
+Test Description(localhost)
 
 
 
