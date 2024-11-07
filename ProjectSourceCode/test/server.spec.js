@@ -51,8 +51,10 @@ it('Negative: /register - Invalid input should return error', done => {
   chai
     .request(server)
     .post('/register')
-    .send({ username: '', password: 'short' }) // Invalid input for testing
+    .send({ username: 'george', password: 'short' }) // Invalid input for testing
     .end((err, res) => {
+      console.log(err);
+      console.log(res.body.message);
       expect(res).to.have.status(400); // Expecting a 400 status code for invalid input
       expect(res.body.message).to.equals('Invalid input'); // Ensure your API sends this message on failure
       done();

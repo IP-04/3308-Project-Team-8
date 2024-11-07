@@ -1,0 +1,9 @@
+ISSUES
+ - concerned with github and still struggling a bit with git commands
+ - docker troubleshooting has been a big obstacle but it is finally working
+ - login, register, and home pages are made
+
+GOALS
+ - finish implenting frame of the website
+    - complete basic API calls for full navigation
+    - finish database setup and population

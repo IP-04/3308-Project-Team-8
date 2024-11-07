@@ -124,7 +124,7 @@ app.post('/register', async (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   try {
     await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
-    res.stats(200).send('Success');
+    res.status(200).send('Success');
     res.redirect('/login');
   } catch (error) {
     res.status(400).send('Invalid input');
