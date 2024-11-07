@@ -59,5 +59,33 @@ it('Negative: /register - Invalid input should return error', done => {
     });
 });
 
+// test redirect
+describe('Testing Redirect', () => {
+  // Sample test case given to test /test endpoint.
+  it('default route should redirect to /home with 302 HTTP status code', done => {
+    chai
+      .request(server)
+      .get('/')
+      .end((err, res) => {
+        res.should.have.status(302); // Expecting a redirect status code
+        res.should.redirectTo('http://localhost:3000/home'); // Expecting a redirect to /home 
+        done();
+      });
+  });
+});
 
+// test home page render
+describe('Testing Render', () => {
+  // Sample test case given to test /test endpoint.
+  it('test "/home" route should render with an html response', done => {
+    chai
+      .request(server)
+      .get('/home') // for reference, see lab 8's login route (/login) which renders home.hbs
+      .end((err, res) => {
+        res.should.have.status(200); // Expecting a success status code
+        res.should.be.html; // Expecting a HTML response
+        done();
+      });
+  });
+});
 // ********************************************************************************
