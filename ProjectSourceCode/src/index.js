@@ -76,6 +76,16 @@ app.use(
 
 // TODO - Include your API routes here
 
+// TEMP ROUTE FOR LAB
+app.get('/welcome', (req, res) => {
+  res.json({status: 'success', message: 'Welcome!'});
+});
+
+// default
+app.get('/', (req, res) => {
+  res.redirect('pages/home');
+});
+
 // Home route
 app.get('/home', (req, res) => {
   res.render('pages/home', {
@@ -161,5 +171,5 @@ app.get('/logout', (req, res) => {
 // <!-- Section 5 : Start Server-->
 // *****************************************************
 // starting the server and keeping the connection open to listen for more requests
-app.listen(3000);
+module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
