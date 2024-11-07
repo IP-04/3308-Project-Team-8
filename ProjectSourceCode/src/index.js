@@ -76,7 +76,84 @@ app.use(
 
 // TODO - Include your API routes here
 
+// Home route
+app.get('/home', (req, res) => {
+  res.render('pages/home', {
+    featuredBooks: [], // Example data (MUST REPLACE)
+    topReviews: [],
+  });
+});
 
+// Login route
+app.get('/login', (req, res) => {
+  res.render('pages/login');
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+    if (user && bcrypt.compareSync(password, user.password)) {
+      req.session.user = user;
+      res.redirect('/home');
+    } else {
+      res.status(401).send('Invalid username or password');
+    }
+  } catch (error) {
+    res.status(500).send('Internal server error');
+  }
+});
+
+// Register route
+app.get('/register', (req, res) => {
+  res.render('pages/register');
+});
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  try {
+    await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+    res.redirect('/login');
+  } catch (error) {
+    res.status(500).send('Error creating user');
+  }
+});
+
+// Review route
+app.get('/book/:id', async (req, res) => {
+  const bookId = req.params.id;
+  try {
+    const book = await db.oneOrNone('SELECT * FROM books WHERE id = $1', [bookId]);
+    const reviews = await db.any('SELECT * FROM reviews WHERE book_id = $1', [bookId]);
+    res.render('pages/review', { book, reviews });
+  } catch (error) {
+    res.status(500).send('Error fetching book details');
+  }
+});
+
+app.post('/book/:id/review', async (req, res) => {
+  const bookId = req.params.id;
+  const { rating, reviewText } = req.body;
+  const userId = req.session.user ? req.session.user.id : null;
+  if (!userId) {
+    res.status(401).send('Please log in to submit a review');
+    return;
+  }
+
+  try {
+    await db.none('INSERT INTO reviews (book_id, user_id, rating, reviewText) VALUES ($1, $2, $3, $4)', [bookId, userId, rating, reviewText]);
+    res.redirect(`/book/${bookId}`);
+  } catch (error) {
+    res.status(500).send('Error submitting review');
+  }
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/login');
+});
 
 
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - BookHive</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/home">Home</a></li>
+                <li><a href="/discover">Discover</a></li>
+                <li><a href="/profile">Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="welcome-section">
+            <h1>Welcome to BookHive!</h1>
+            <p>Your go-to platform for sharing and discovering book reviews.</p>
+        </section>
+
+        <section class="featured-books">
+            <h2>Featured Books</h2>
+            {{#if featuredBooks.length}}
+                <ul>
+                    {{#each featuredBooks}}
+                        <li class="book-card">
+                            <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
+                            <div class="book-info">
+                                <h3>{{this.title}}</h3>
+                                <p>{{this.author}}</p>
+                                <a href="/book/{{this.id}}" class="btn">View Details</a>
+                            </div>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p>No featured books at the moment. Check back later!</p>
+            {{/if}}
+        </section>
+
+        <section class="top-reviews">
+            <h2>Top-Rated Reviews</h2>
+            {{#if topReviews.length}}
+                <ul>
+                    {{#each topReviews}}
+                        <li>
+                            <h3>{{this.bookTitle}}</h3>
+                            <p><strong>{{this.user}}:</strong> {{this.reviewText}}</p>
+                            <p>Rating: {{this.rating}}/5</p>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p>No top reviews available right now.</p>
+            {{/if}}
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 BookHive | All Rights Reserved</p>
+    </footer>
+</body>
+</html>
