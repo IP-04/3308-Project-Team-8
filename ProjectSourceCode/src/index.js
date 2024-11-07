@@ -127,7 +127,7 @@ app.post('/register', async (req, res) => {
     res.stats(200).send('Success');
     res.redirect('/login');
   } catch (error) {
-    res.status(500).send('Error creating user');
+    res.status(400).send('Invalid input');
   }
 });
 
