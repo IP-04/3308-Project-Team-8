@@ -29,4 +29,35 @@ describe('Server!', () => {
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
 
+// Positive Test Case
+chai.use(chaiHttp);
+
+describe('Testing Register API', () => {
+  it('Positive: /register - Successfully registers a user', done => {
+    chai
+      .request(server)
+      .post('/register') // Adjust the endpoint if your register route has a different name
+      .send({ username: 'testuser', password: 'password123' }) // Sample input
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.equals('Success'); // Ensure your API sends this message on success
+        done();
+      });
+  });
+});
+
+// Negative Test Case
+it('Negative: /register - Invalid input should return error', done => {
+  chai
+    .request(server)
+    .post('/register')
+    .send({ username: '', password: 'short' }) // Invalid input for testing
+    .end((err, res) => {
+      expect(res).to.have.status(400); // Expecting a 400 status code for invalid input
+      expect(res.body.message).to.equals('Invalid input'); // Ensure your API sends this message on failure
+      done();
+    });
+});
+
+
 // ********************************************************************************
