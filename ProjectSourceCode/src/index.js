@@ -76,14 +76,9 @@ app.use(
 
 // TODO - Include your API routes here
 
-// TEMP ROUTE FOR LAB
-app.get('/welcome', (req, res) => {
-  res.json({status: 'success', message: 'Welcome!'});
-});
-
 // default
 app.get('/', (req, res) => {
-  res.redirect('pages/home');
+  res.redirect('/home');
 });
 
 // Home route

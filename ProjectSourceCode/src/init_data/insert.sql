@@ -1,4 +1,4 @@
 INSERT INTO users
     (username, password)
 VALUES
-    ('coolguy', 'imthecoolest')
+    ('coolguy', 'imthecoolestimthecoolestimthecoolestimthecoolestimthecoolest')
