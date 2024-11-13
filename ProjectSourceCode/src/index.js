@@ -116,7 +116,6 @@ app.get('/profile', (req, res) => {
   if (user) {username = user.username;}
   res.render('pages/profile', {
     username: username,
-    profilePic: req.session.user.profilePic,
     description: req.session.user.description,
   });
 });
