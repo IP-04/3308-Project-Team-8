@@ -89,6 +89,16 @@ app.get('/home', (req, res) => {
   });
 });
 
+// Discover route
+app.get('/discover', (req,res) => {
+  res.render('pages/discover', {
+    recommendedBooks: [], // Example data (MUST REPLACE)
+    newReleases: [],
+    trendingBooks: [],
+    wishlist : [],
+  });
+});
+
 // Login route
 app.get('/login', (req, res) => {
   res.render('pages/login');
@@ -100,6 +110,7 @@ app.post('/login', async (req, res) => {
     const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
     if (user && bcrypt.compareSync(password, user.password)) {
       req.session.user = user;
+      res.status(302);
       res.redirect('/home');
     } else {
       res.status(401).send('Invalid username or password');

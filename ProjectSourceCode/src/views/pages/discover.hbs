@@ -1,42 +1,88 @@
 {{!-- discover.hbs --}}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discover Books</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
 
-    <header>
-        <h1>Recommended Books</h1>
-    </header>
+<main class="ms-3">
+    <section class="recommendations">
+        <h4>Recommended Books | Based on Your Interests & Friends</h4>
 
-    <main>
-        <section class="recommendations">
-            <h2>Books Based on Your Interests & Friends</h2>
+        {{#if recommendations.length}}
+            <ul>
+                {{#each recommendations}}
+                    <li class="book-card">
+                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
+                        <div class="book-info">
+                            <h3>{{this.title}}</h3>
+                            <p>{{this.author}}</p>
+                            <p><strong>Genre:</strong> {{this.genre}}</p>
+                            <p>{{this.description}}</p>
+                        </div>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>No recommendations available.</p>
+        {{/if}}
+    </section>
+    <section class="newReleases">
+        <h4>New Releases</h4>
 
-            {{#if recommendations.length}}
-                <ul>
-                    {{#each recommendations}}
-                        <li class="book-card">
-                            <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
-                            <div class="book-info">
-                                <h3>{{this.title}}</h3>
-                                <p>{{this.author}}</p>
-                                <p><strong>Genre:</strong> {{this.genre}}</p>
-                                <p>{{this.description}}</p>
-                            </div>
-                        </li>
-                    {{/each}}
-                </ul>
-            {{else}}
-                <p>No recommendations available.</p>
-            {{/if}}
-        </section>
-    </main>
+        {{#if newReleases.length}}
+            <ul>
+                {{#each rewReleases}}
+                    <li class="book-card">
+                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
+                        <div class="book-info">
+                            <h3>{{this.title}}</h3>
+                            <p>{{this.author}}</p>
+                            <p><strong>Genre:</strong> {{this.genre}}</p>
+                            <p>{{this.description}}</p>
+                        </div>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>No new releases available.</p>
+        {{/if}}
+    </section>
+    <section class="trending">
+        <h4>Trending Books</h4>
 
-    <footer>
-        <p>&copy; 2024 Book Recommendations</p>
-    </footer>
+        {{#if trendingBooks.length}}
+            <ul>
+                {{#each trendingBooks}}
+                    <li class="book-card">
+                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
+                        <div class="book-info">
+                            <h3>{{this.title}}</h3>
+                            <p>{{this.author}}</p>
+                            <p><strong>Genre:</strong> {{this.genre}}</p>
+                            <p>{{this.description}}</p>
+                        </div>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>No trending options available.</p>
+        {{/if}}
+    </section>
+    <section class="Wishlist">
+        <h4>Your Wishlist | Books Saved by You</h4>
 
-</body>
+        {{#if wishlist.length}}
+            <ul>
+                {{#each wishlist}}
+                    <li class="book-card">
+                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
+                        <div class="book-info">
+                            <h3>{{this.title}}</h3>
+                            <p>{{this.author}}</p>
+                            <p><strong>Genre:</strong> {{this.genre}}</p>
+                            <p>{{this.description}}</p>
+                        </div>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>Wishlist is empty.</p>
+        {{/if}}
+    </section>
+</main>
