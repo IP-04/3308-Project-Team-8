@@ -21,7 +21,7 @@ Test Description (localhost):
 User Jane: Logins in
 Action: User clicks on a book
 Results: Page will display Title, Author, Date Released, & Bio of Book
-Aceptance Criteria: Book Info Page needs to be visibility
+Aceptance Criteria: Book Info Page needs to be visible
 User Aceptance Tester: Users
 
 ## Feature: Recommended Books on Discover Page
