@@ -2,26 +2,26 @@
 
 
 ## Feature: Reccomendation Algorithm with no reccomendations
-Test Case: 
+Test Case:\
 User who has no friends or likes will not be shown any reccomendations
 
-Test Description (localhost):
-User Joe: Logins in 
-Action: Navigate towards recommendation section
-Results: Shows zero or no under recommendations for Joe
-Aceptance Criteria: Joe has no friends or liked books
+Test Description (localhost):\
+User Joe: Logins in  
+Action: Navigate towards recommendation section\
+Results: Shows zero or no under recommendations for Joe\
+Aceptance Criteria: Joe has no friends or liked books\
 User Aceptance Tester: Users
 
 
 ## Feature: Display Book info-
-Test Case: 
+Test Case:\
 User will click on Book info & see discription
 
-Test Description (localhost):
-User Jane: Logins in
-Action: User clicks on a book
-Results: Page will display Title, Author, Date Released, & Bio of Book
-Aceptance Criteria: Book Info Page needs to be visible
+Test Description (localhost):\
+User Jane: Logins in\
+Action: User clicks on a book\
+Results: Page will display Title, Author, Date Released, & Bio of Book\
+Aceptance Criteria: Book Info Page needs to be visible\
 User Aceptance Tester: Users
 
 ## Feature: Recommended Books on Discover Page
