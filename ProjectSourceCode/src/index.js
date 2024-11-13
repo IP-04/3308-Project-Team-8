@@ -135,6 +135,7 @@ app.post('/login', async (req, res) => {
       res.status(302);
       res.redirect('/home');
     } else {
+      console.log(user);
       res.status(401).send('Invalid username or password');
     }
   } catch (error) {
@@ -149,15 +150,30 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
+  console.log(username);  // For debugging
+  console.log(password);
   const hashedPassword = bcrypt.hashSync(password, 10);
   try {
     await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+    
     res.status(200).send('Success');
     res.redirect('/login');
   } catch (error) {
     res.status(400).send('Invalid input');
   }
 });
+
+// Authentication Middleware.
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login');
+  }
+  next();
+};
+
+// Authentication Required
+app.use(auth);
 
 // Review route
 app.get('/book/:id', async (req, res) => {

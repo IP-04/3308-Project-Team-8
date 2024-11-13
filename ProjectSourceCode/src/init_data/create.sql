@@ -30,12 +30,12 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 CREATE TABLE IF NOT EXISTS friends (
 	user_id SMALLINT,
-	friend_id SMALL INT
+	friend_id SMALLINT
 );
 
 CREATE TABLE IF NOT EXISTS users_to_profiles (
 	user_id SMALLINT,
-	profile_id SMALLINT,
+	profile_id SMALLINT
 );
 
 CREATE TABLE IF NOT EXISTS reviews_to_books (
