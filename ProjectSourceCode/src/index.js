@@ -13,6 +13,8 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcryptjs'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
 
+app.use(express.static(__dirname + '/'));
+
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -83,7 +85,11 @@ app.get('/', (req, res) => {
 
 // Home route
 app.get('/home', (req, res) => {
+  const user = req.session.user;
+  const username = " ";
+  if (user) {username = user.username;}
   res.render('pages/home', {
+    username: username,
     featuredBooks: [], // Example data (MUST REPLACE)
     topReviews: [],
   });
@@ -91,11 +97,27 @@ app.get('/home', (req, res) => {
 
 // Discover route
 app.get('/discover', (req,res) => {
+  const user = req.session.user;
+  const username = " ";
+  if (user) {username = user.username;}
   res.render('pages/discover', {
+    username: username,
     recommendedBooks: [], // Example data (MUST REPLACE)
     newReleases: [],
     trendingBooks: [],
     wishlist : [],
+  });
+});
+
+// Profile route
+app.get('/profile', (req, res) => {
+  const user = req.session.user;
+  const username = " ";
+  if (user) {username = user.username;}
+  res.render('pages/profile', {
+    username: username,
+    profilePic: req.session.user.profilePic,
+    description: req.session.user.description,
   });
 });
 
@@ -110,6 +132,7 @@ app.post('/login', async (req, res) => {
     const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
     if (user && bcrypt.compareSync(password, user.password)) {
       req.session.user = user;
+      req.session.save();
       res.status(302);
       res.redirect('/home');
     } else {
