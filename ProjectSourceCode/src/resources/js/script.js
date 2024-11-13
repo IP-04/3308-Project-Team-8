@@ -1,8 +1,8 @@
 function checkSession(username) {
-    const loginBtn = document.getElementById('login');
-    const logoutBtn = document.getElementById('logout');
-    const registerBtn = document.getElementById('register');
-    const profileBtn = document.getElementById('profile');
+    const loginBtn = document.getElementById('loginbtn');
+    const logoutBtn = document.getElementById('logoutbtn');
+    const registerBtn = document.getElementById('registerbtn');
+    const profileBtn = document.getElementById('profilebtn');
     if(username = " ") {
         loginBtn.classList.replace('hidden', 'nav-item');
         registerBtn.classList.replace('hidden', 'nav-item');

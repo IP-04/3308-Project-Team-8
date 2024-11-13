@@ -86,7 +86,7 @@ app.get('/', (req, res) => {
 // Home route
 app.get('/home', (req, res) => {
   const user = req.session.user;
-  const username = " ";
+  var username = " ";
   if (user) {username = user.username;}
   res.render('pages/home', {
     username: username,
@@ -98,7 +98,7 @@ app.get('/home', (req, res) => {
 // Discover route
 app.get('/discover', (req,res) => {
   const user = req.session.user;
-  const username = " ";
+  var username = " ";
   if (user) {username = user.username;}
   res.render('pages/discover', {
     username: username,
@@ -112,7 +112,7 @@ app.get('/discover', (req,res) => {
 // Profile route
 app.get('/profile', (req, res) => {
   const user = req.session.user;
-  const username = " ";
+  var username = " ";
   if (user) {username = user.username;}
   res.render('pages/profile', {
     username: username,
@@ -156,7 +156,7 @@ app.post('/register', async (req, res) => {
   try {
     await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
     
-    res.status(200).send('Success');
+    res.status(200);
     res.redirect('/login');
   } catch (error) {
     res.status(400).send('Invalid input');

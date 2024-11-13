@@ -25,6 +25,14 @@ footer {
     height: 0;
   }
 
+.btn-primary {
+    --bs-btn-bg: #d19c1d;
+    --bs-btn-color: #363020;
+    --bs-btn-border-color: #d19c1d;
+    --bs-btn-hover-bg: #d98324;
+    --bs-btn-hover-border-color: #d98324;
+}
+
 .bg-primary {
     background-color: #d19c1d;
     color: #363020;
