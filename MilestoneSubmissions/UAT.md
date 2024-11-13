@@ -1,29 +1,30 @@
-#User Aceptance Testing (UAT)
+# User Aceptance Testing (UAT)
 
 
-##Feature: Reccomendation Algorithm-
+## Feature: Reccomendation Algorithm with no reccomendations
 Test Case: 
 User who has no friends or likes will not be shown any reccomendations
 
 Test Description (localhost):
-User Joe: logins in 
-Displays: No(as in zero) Friends or likes in books
-Navigate towards recommendation section
-
-Test Results: Shows zero or no under recommendations for Joe
-
+User Joe: Logins in 
+Action: Navigate towards recommendation section
+Results: Shows zero or no under recommendations for Joe
+Aceptance Criteria: Joe has no friends or liked books
 User Aceptance Tester: Users
 
 
-##Feature: Display Book info-
+## Feature: Display Book info-
 Test Case: 
 User will click on Book info & see discription
 
-Test Description(localhost)
+Test Description (localhost):
+User Jane: Logins in
+Action: User clicks on a book
+Results: Page will display Title, Author, Date Released, & Bio of Book
+Aceptance Criteria: Book Info Page needs to be visibility
+User Aceptance Tester: Users
 
-
-
-Feature: Recommended Books on Discover Page
+## Feature: Recommended Books on Discover Page
 The "Recommended Books" feature on the Discover page is designed to 
 offer users personalized book suggestions based on genres they frequently read and books their friends have recently enjoyed. 
 This test plan ensures that the feature functions as intended, using a series of specific test cases to verify expected behaviors. 
