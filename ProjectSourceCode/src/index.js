@@ -2,16 +2,16 @@
 // <!-- Section 1 : Import Dependencies -->
 // *****************************************************
 
-const express = require('express'); // To build an application server or API
+const express = require('express');
 const app = express();
 const handlebars = require('express-handlebars');
-const Handlebars = require('handlebars');
 const path = require('path');
 const pgp = require('pg-promise')(); // To connect to the Postgres DB from the node server
 const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
-const bcrypt = require('bcryptjs'); //  To hash passwords
+const bcrypt = require('bcrypt'); // changge it from bcryptjs to bcrypt
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
+
 
 app.use(express.static(__dirname + '/'));
 
@@ -41,7 +41,7 @@ const db = pgp(dbConfig);
 db.connect()
   .then(obj => {
     console.log('Database connection successful'); // you can view this message in the docker compose logs
-    obj.done(); // success, release the connection;
+    obj.done(); // success, release the connection
   })
   .catch(error => {
     console.log('ERROR:', error.message || error);
@@ -55,7 +55,7 @@ db.connect()
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
+app.use(bodyParser.json());  // specify the usage of JSON for parsing request body.
 
 // initialize session variables
 app.use(
@@ -65,12 +65,7 @@ app.use(
     resave: false,
   })
 );
-
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // *****************************************************
 // <!-- Section 4 : API Routes -->
@@ -78,7 +73,7 @@ app.use(
 
 // TODO - Include your API routes here
 
-// default
+// Default
 app.get('/', (req, res) => {
   res.redirect('/home');
 });
@@ -198,48 +193,45 @@ app.get('/home', (req, res) => {
 });
 
 // Discover route
-app.get('/discover', (req,res) => {
+app.get('/discover', (req, res) => {
   const user = req.session.user;
-  var username = " ";
-  if (user) {username = user.username;}
+  const username = user ? user.username : ' ';
   res.render('pages/discover', {
-    username: username,
+    username,
     recommendedBooks: [], // Example data (MUST REPLACE)
     newReleases: [],
     trendingBooks: [],
-    wishlist : [],
+    wishlist: []
   });
 });
 
 // Profile route
 app.get('/profile', (req, res) => {
-  if (!req.session.user) {
-    // Redirect to login if the user is not authenticated
-    return res.redirect('/login');
-  }
+  if (!req.session.user) return res.redirect('/login');  // Redirect to login if the user is not authenticated
+
   const user = req.session.user;
-  const username = user.username || "Guest";
-  const description = user.description || "No description available."; // Provide fallback if description is missing
-  // Example data (replace with database queries if available)
-  const reviews = [
-    { title: 'Amazing Book!', date: '2024-10-01', reviewText: 'Loved it!' },
-    { title: 'Could be better', date: '2024-09-15', reviewText: 'It was okay.' },
-  ];
-  const genres = ['Fiction', 'Science Fiction', 'Fantasy'];
-  const friends = [
-    { name: 'Alice', activity: 'Read "The Great Gatsby"', timeAgo: '2 hours ago' },
-    { name: 'Bob', activity: 'Added "1984" to wishlist', timeAgo: '5 hours ago' },
-  ];
+  const username = user.username || 'Guest';
+  const description = user.description || 'No description available.'; // Provide fallback if description is missing
+
+  // Modified profile data for testing
   res.render('pages/profile', {
-    username: username,
-    description: description,
-    reviews: reviews,
-    genres: genres,
-    friends: friends,
+    username,
+    description,
+    reviews: [
+      { title: 'Amazing Book!', date: '2024-10-01', reviewText: 'Loved it!' },
+      { title: 'Could be better', date: '2024-09-15', reviewText: 'It was okay.' },
+    ],
+    genres: ['Fiction', 'Science Fiction', 'Fantasy'],
+    friends: [
+      { name: 'Alice', activity: 'Read "The Great Gatsby"', timeAgo: '2 hours ago' },
+      { name: 'Bob', activity: 'Added "1984" to wishlist', timeAgo: '5 hours ago' },
+    ],
   });
 });
 
 // Login route
+//Usedd bcrypt instead of bcryptjs
+// it works by hashing the password and comparing it to the hashed password in the database
 app.get('/login', (req, res) => {
   res.render('pages/login');
 });
@@ -248,13 +240,11 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
     const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
-    if (user && bcrypt.compareSync(password, user.password)) {
+    if (user && bcrypt.compareSync(password, user.password)) { //`bcrypt.compareSync` compares the password entered by the user with the hashed password in the database
       req.session.user = user;
       req.session.save();
-      res.status(302);
-      res.redirect('/home');
+      res.status(302).redirect('/home');
     } else {
-      console.log(user);
       res.status(401).send('Invalid username or password');
     }
   } catch (error) {
@@ -269,29 +259,21 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
-  console.log(username);  // For debugging
-  console.log(password);
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(password, 10); //`bcrypt.hashSync` hashes the password entered by the user
   try {
     await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
-    
-    res.status(200);
-    res.redirect('/login');
+    res.status(200).redirect('/login');
   } catch (error) {
     res.status(400).send('Invalid input');
   }
 });
 
-// Authentication Middleware.
+// Authentication Middleware
 const auth = (req, res, next) => {
-  if (!req.session.user) {
-    // Default to login page.
-    return res.redirect('/login');
-  }
+  if (!req.session.user) return res.redirect('/login');
   next();
 };
 
-// Authentication Required
 app.use(auth);
 
 // Review route
@@ -329,11 +311,9 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-
-
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
-// starting the server and keeping the connection open to listen for more requests
-module.exports = app.listen(3000);
-console.log('Server is listening on port 3000');
+module.exports = app.listen(3000, () => {
+  console.log('Server is listening on port 3000');
+});
