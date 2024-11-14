@@ -18,3 +18,16 @@ function checkSession(username) {
     }
     
 }
+<!--function to change visibility of the password on click -->
+
+function togglePasswordVisibility(){
+	var x = document.getElementById("password");
+
+	<!--alternate between hidden and visible-->
+	if(x.type == "password"){
+		x.type = "text";
+	
+	}else{
+		x.type = "password";
+	}
+}
