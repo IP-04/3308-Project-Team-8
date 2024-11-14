@@ -252,6 +252,8 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
+
 // Register route
 app.get('/register', (req, res) => {
   res.render('pages/register');
