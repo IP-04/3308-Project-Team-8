@@ -1,0 +1,12 @@
+ISSUES
+ - API not populating database properly
+ - adjust when API is called
+ - Navbar buttons not toggling based on user session
+ - adjust error code output
+ - fix test cases and add more
+
+GOALS
+ - minimum viable product by end of next week
+    - fully functioning user interface with good displays
+    - successfully add reviews and view other profiles
+    - view book information page

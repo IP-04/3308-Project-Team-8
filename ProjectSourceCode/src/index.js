@@ -143,7 +143,7 @@ app.get('/home', (req, res) => {
               google_vol[i],
             ])
               .catch(function (err) {
-                return console.log(err);
+                //return console.log(err);
             })
           })
           .catch(function (err) { // if an average rating cannot be calculated, populate with it as 0
@@ -158,7 +158,7 @@ app.get('/home', (req, res) => {
               google_vol[i],
             ])
             .catch(function (err) {
-              return console.log(err);
+              //return console.log(err);
             })
           })
       }
