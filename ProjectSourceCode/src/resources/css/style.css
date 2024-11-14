@@ -1,4 +1,7 @@
 body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
     background-color: #f1f7ed;
     color: #363020;
   }
@@ -10,14 +13,73 @@ form {
     padding: 20px;
 }
 
-nav {
-    background-color: #d19c1d;
-    color: #363020;
-}
-
 footer {
     background-color: #d98324;
     color: #363020;
+    margin-top: auto;
+}
+
+nav {
+    background-color: #d19c1d;
+    color: #363020;
+    padding: 0.5rem 1rem; /* Adjust navbar padding for batter spacing */
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Ensure logo and links are spaced correctly */
+    align-items: center; /* Vertically align items */
+}
+
+.navbar-brand img {
+    width: 30px; /* Ensure logo is the correct size */
+    height: 24px;
+    margin-right: 15px; /* Space between logo and links */
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    margin-left: 20px; /* Space between logo and links */
+}
+
+.navbar-nav .nav-item .nav-link {
+    color: #363020; /* Set the color of the links */
+    padding: 10px 15px;
+    text-decoration: none;
+    margin-right: 15px; /* Space between links */
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+    background-color: #f8f9fa; /* Hover effect */
+    border-radius: 5px;
+}
+
+.navbar-nav.ms-auto {
+    margin-left: auto; /* Push these items to the far right */
+}
+
+.navbar-nav.ms-auto .nav-item .nav-link {
+    color: #363020;
+    padding: 10px 15px;
+}
+
+.navbar-nav.ms-auto .nav-item .nav-link:hover {
+    background-color: #f8f9fa; /* Hover effect */
+}
+
+/* Center content both horizontally and vertically */
+.main-content {
+    display: flex;
+    justify-content: center; /* Horizontally center content */
+    height: 100vh; /* Full height */
+}
+
+/* Ensure the container has a good amount of padding and margin */
+.container {
+    width: 100%; /* Ensure it stretches full width */
+    max-width: 1200px; /* Optional: set a max-width for large screens */
+    padding: 0 15px; /* Optional: padding for smaller screens */
 }
 
 .hidden {

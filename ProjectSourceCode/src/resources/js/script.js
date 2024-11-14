@@ -3,7 +3,7 @@ function checkSession(username) {
     const logoutBtn = document.getElementById('logoutbtn');
     const registerBtn = document.getElementById('registerbtn');
     const profileBtn = document.getElementById('profilebtn');
-    if(username = " ") {
+    if(username = "Guest") {
         loginBtn.classList.replace('hidden', 'nav-item');
         registerBtn.classList.replace('hidden', 'nav-item');
 

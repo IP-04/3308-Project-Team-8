@@ -1,36 +1,36 @@
 <header>
- <nav class="navbar navbar-expand-sm border-bottom">
-   <div class="container">
-     <button
-       class="navbar-toggler ms-auto"
-       type="button"
-       data-bs-toggle="collapse"
-       data-bs-target="#navbar-collapse"
-       aria-controls="navbar"
-       aria-expanded="false"
-       aria-label="Toggle navigation">
-       <span class="navbar-toggler-icon"></span>
-     </button>
-     <div class="collapse navbar-collapse" id="navbar-collapse">
-        <!--Link to home page using logo image-->
-        <div class="container">
-            <a class="navbar-brand" href="../home">
-                <img src="../../resources/img/Beehive_Logo.png" alt="" width="30" height="24">
-            </a>
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
-              <li class="nav-item"><a class="nav-link" href="/discover">Discover</a></li>
-              <li class="nav-item" id="profilebtn"><a class="nav-link" href="/profile">Profile</a></li>
-            </ul>
-        </div>
+  <nav class="navbar navbar-expand-sm border-bottom">
+    <div class="container">
+      <!-- Toggler button for mobile views -->
+      <button
+        class="navbar-toggler ms-auto"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbar-collapse"
+        aria-controls="navbar"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- Navbar content (logo and links) -->
+      <div class="collapse navbar-collapse" id="navbar-collapse">
+        <!-- Logo and primary navigation links -->
+        <a class="navbar-brand" href="../home">
+          <img src="../../resources/img/Beehive_Logo.png" alt="Beehive Logo" width="30" height="24">
+        </a>
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/discover">Discover</a></li>
+          <li class="nav-item" id="profilebtn"><a class="nav-link" href="/profile">Profile</a></li>
+        </ul>
 
-       <div class="navbar-nav me-1">
+        <!-- Login/Register/Logout buttons -->
+        <div class="navbar-nav ms-auto">
           <li class="nav-item" id="registerbtn"><a class="nav-link" href="/register">Register</a></li>
           <li class="nav-item" id="loginbtn"><a class="nav-link" href="/login">Login</a></li>
-       		<li class="nav-item" id="logoutbtn"><a class="nav-link" href="/logout">Logout</a></li>
-       </div>
-     </div>
-   </div>
- </nav>
- <!--link to stylesheet-->
+          <li class="nav-item" id="logoutbtn"><a class="nav-link" href="/logout">Logout</a></li>
+        </div>
+      </div>
+    </div>
+  </nav>
 </header>

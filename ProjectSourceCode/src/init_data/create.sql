@@ -12,19 +12,22 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 CREATE TABLE IF NOT EXISTS books (
 	id SERIAL PRIMARY KEY,
-	title VARCHAR(60),
+	title VARCHAR(2000),
 	author VARCHAR(50),
-	avg_rating SMALLINT,
-	description VARCHAR(500),
+	thumbnail_link VARCHAR(200),
+	avg_rating FLOAT,
+	description VARCHAR(5000),
 	sample VARCHAR(5000),
-	purchase_link VARCHAR(50)
+	purchase_link VARCHAR(200),
+	google_volume VARCHAR(12) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS reviews (
 	id SERIAL PRIMARY KEY,
+	google_volume VARCHAR(12) NOT NULL,
 	title VARCHAR(30),
 	description VARCHAR(250),
-	rating SMALLINT,
+	rating FLOAT,
 	visibility BOOL
 );
 

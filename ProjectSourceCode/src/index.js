@@ -86,13 +86,115 @@ app.get('/', (req, res) => {
 // Home route
 app.get('/home', (req, res) => {
   const user = req.session.user;
-  var username = " ";
+  var username = "Guest";
   if (user) {username = user.username;}
-  res.render('pages/home', {
-    username: username,
-    featuredBooks: [], // Example data (MUST REPLACE)
-    topReviews: [],
-  });
+  
+  // Call API to populate book database tables upon loading /home
+  axios({
+    url: `https://www.googleapis.com/books/v1/volumes`,
+    method: 'GET',
+    dataType: 'json',
+    headers: {
+      'Accept-Encoding': 'application/json',
+    },
+    params: {
+      key: process.env.API_KEY,
+      q: 'e',
+      maxResults: 40 // cannot exceed 40, limitation set by google
+    },
+  })
+    .then(results => {
+      // populate database with API data, all book table data except avg_rating comes from API
+      var avg_rating_q = `SELECT AVG(rating) 
+                          FROM reviews 
+                          INNER JOIN reviews_to_books
+                            ON reviews.id = review_id
+                          INNER JOIN books
+                            ON reviews_to_books.book_id = books.id
+                          GROUP BY books.id
+                          HAVING books.google_volume = ($1)`; // calculates average rating in SQL
+      // insert API data into SQL
+      var insert_bulk = `INSERT INTO books (title, author, thumbnail_link, avg_rating, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+      
+      const title = []; // define vars outside of loop
+      const author = [];
+      const thumbnail = [];
+      const desc = [];
+      const sample = [];
+      const purchase = [];
+      const google_vol = [];
+      const google_books = results.data.items;
+
+      for (let i = 0; i < 40; i++) { // populate data of all 40 returned books from API into const vars
+        title[i] = google_books[i].volumeInfo.title;
+        if (google_books[i].volumeInfo.authors) {author[i] = google_books[i].volumeInfo.authors[0];}
+        if(google_books[i].volumeInfo.imageLinks) {thumbnail[i] = google_books[i].volumeInfo.imageLinks.smallThumbnail;}
+        desc[i] = google_books[i].volumeInfo.description;
+        sample[i] = google_books[i].volumeInfo.previewLink;
+        purchase[i] = google_books[i].volumeInfo.infoLink;
+        google_vol[i] = google_books[i].id;
+      }
+      for(let i = 0; i < 40; i++) { // mix const vars with SQL query to populate database
+        db.one(avg_rating_q, [google_vol[i]])
+          .then(results => {
+            db.any(insert_bulk, [
+              title[i],
+              author[i],
+              thumbnail[i],
+              results,
+              desc[i],
+              sample[i],
+              purchase[i],
+              google_vol[i],
+            ])
+              .catch(function (err) {
+                return console.log(err);
+            })
+          })
+          .catch(function (err) { // if an average rating cannot be calculated, populate with it as 0
+            db.any(insert_bulk, [
+              title[i],
+              author[i],
+              thumbnail[i],
+              0,
+              desc[i],
+              sample[i],
+              purchase[i],
+              google_vol[i],
+            ])
+            .catch(function (err) {
+              return console.log(err);
+            })
+          })
+      }
+
+      // populates featuredBooks for home page display (NOT WORKING)
+      var featuredBooks = [];
+      const featured_q = `SELECT * FROM books`; 
+      db.any(featured_q)
+        .then(results => {
+          featuredBooks = results;
+          console.log(results);
+        })
+        .catch(function (err) {
+          return console.log(err);
+        })
+      console.log(featuredBooks);
+      
+      // render home page
+      res.render('pages/home',{
+          username: username,
+          featuredBooks: featuredBooks
+      });
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(404);
+      res.render('pages/home',{
+        books: []
+      });
+      // Handle errors
+    });
 });
 
 // Discover route
@@ -111,12 +213,29 @@ app.get('/discover', (req,res) => {
 
 // Profile route
 app.get('/profile', (req, res) => {
+  if (!req.session.user) {
+    // Redirect to login if the user is not authenticated
+    return res.redirect('/login');
+  }
   const user = req.session.user;
-  var username = " ";
-  if (user) {username = user.username;}
+  const username = user.username || "Guest";
+  const description = user.description || "No description available."; // Provide fallback if description is missing
+  // Example data (replace with database queries if available)
+  const reviews = [
+    { title: 'Amazing Book!', date: '2024-10-01', reviewText: 'Loved it!' },
+    { title: 'Could be better', date: '2024-09-15', reviewText: 'It was okay.' },
+  ];
+  const genres = ['Fiction', 'Science Fiction', 'Fantasy'];
+  const friends = [
+    { name: 'Alice', activity: 'Read "The Great Gatsby"', timeAgo: '2 hours ago' },
+    { name: 'Bob', activity: 'Added "1984" to wishlist', timeAgo: '5 hours ago' },
+  ];
   res.render('pages/profile', {
     username: username,
-    description: req.session.user.description,
+    description: description,
+    reviews: reviews,
+    genres: genres,
+    friends: friends,
   });
 });
 
