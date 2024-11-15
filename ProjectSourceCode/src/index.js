@@ -129,7 +129,10 @@ app.get('/home', (req, res) => {
         purchase[i] = google_books[i].volumeInfo.infoLink;
         google_vol[i] = google_books[i].id;
       }
-      for(let i = 0; i < 40; i++) { // mix const vars with SQL query to populate database
+      const featuredBooks = google_books.slice(1,7); // this determines what books are displayed
+      const trendingBooks = google_books.slice(7,13);
+
+      /*for(let i = 0; i < 10; i++) { // mix const vars with SQL query to populate database
         db.one(avg_rating_q, [google_vol[i]])
           .then(results => {
             db.any(insert_bulk, [
@@ -161,9 +164,9 @@ app.get('/home', (req, res) => {
               //return console.log(err);
             })
           })
-      }
+      }*/
 
-      // populates featuredBooks for home page display (NOT WORKING)
+      /*/ populates featuredBooks for home page display (NOT WORKING)
       var featuredBooks = [];
       const featured_q = `SELECT * FROM books`; 
       db.any(featured_q)
@@ -174,12 +177,15 @@ app.get('/home', (req, res) => {
         .catch(function (err) {
           return console.log(err);
         })
-      console.log(featuredBooks);
+      console.log(featuredBooks);*/
       
       // render home page
       res.render('pages/home',{
+          user: user,
           username: username,
-          featuredBooks: featuredBooks
+          books: google_books,
+          featuredBooks: featuredBooks,
+          trendingBooks: trendingBooks,
       });
     })
     .catch(error => {
@@ -195,14 +201,21 @@ app.get('/home', (req, res) => {
 // Discover route
 app.get('/discover', (req, res) => {
   const user = req.session.user;
-  const username = user ? user.username : ' ';
-  res.render('pages/discover', {
-    username,
-    recommendedBooks: [], // Example data (MUST REPLACE)
-    newReleases: [],
-    trendingBooks: [],
-    wishlist: []
-  });
+  //const username = user ? user.username : 'Guest';
+  if (user) {
+    username = user.username;
+    res.render('pages/discover', {
+      username,
+      recommendedBooks: [], // Example data (MUST REPLACE)
+      newReleases: [],
+      trendingBooks: [],
+      wishlist: []
+    });
+  } else {
+    res.status(302);
+    res.redirect('/login');
+  }
+  
 });
 
 // Profile route

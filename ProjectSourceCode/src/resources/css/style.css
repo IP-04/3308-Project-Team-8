@@ -75,6 +75,21 @@ nav {
     height: 100vh; /* Full height */
 }
 
+.book-card {
+    width: 18rem;
+    padding: 5px 5px;
+}
+
+.card-img-top { /*optained from stack overflow https://stackoverflow.com/questions/37287153/how-to-get-images-in-bootstraps-card-to-be-the-same-height-width */
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+}
+
+.card-title {
+    font-weight: bold;
+}
+
 /* Ensure the container has a good amount of padding and margin */
 .container {
     width: 100%; /* Ensure it stretches full width */
@@ -95,12 +110,12 @@ nav {
     --bs-btn-hover-border-color: #d98324;
 }
 
-.bg-primary {
+.bg-1 {
     background-color: #d19c1d;
     color: #363020;
 }
 
-.bg-secondary {
+.bg-2 {
     background-color: #d98324;
     color: #363020;
 }

@@ -1,28 +1,52 @@
 <body>
 
     <main class="ms-3">
-        <section class="welcome-section">
+        <section id="welcome-section">
             <h1>Welcome to BookHive!</h1>
             <p>Your go-to platform for sharing and discovering book reviews.</p>
         </section>
 
-        <section class="featured-books">
+        <section id="featured-books" class="container-fluid">
             <h2>Featured Books</h2>
-            {{#if featuredBooks.length}}
-                <ul>
+            {{#if featuredBooks}}
+                <ul class="row">
                     {{#each featuredBooks}}
-                        <li class="book-card">
-                            <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="book-cover">
-                            <div class="book-info">
-                                <h3>{{this.title}}</h3>
-                                <p>{{this.author}}</p>
-                                <a href="/book/{{this.id}}" class="btn">View Details</a>
+                        <li class="col-2 d-flex justify-content-center">
+                            <div class=" card book-card bg-1 h-100">
+                                <img src="{{this.volumeInfo.imageLinks.smallThumbnail}}" alt="{{this.volumeInfo.title}} Cover" class="card-img-top book-cover">
+                                <div class="card-body book-info bg-light rounded-bottom">
+                                    <!--<p class="card-title">{{this.volumeInfo.title}}</p> commented out because displayed in thumbnail, maybe add tooltip?
+                                    <p class="card-text">{{this.volumeInfo.authors.[0]}}</p>--> 
+                                    <a href="/book/{{this.id}}" class="btn btn-primary">View Details</a>
+                                </div>
                             </div>
                         </li>
                     {{/each}}
-                </ul>
+                </ul><br>
             {{else}}
                 <p>No featured books at the moment. Check back later!</p>
+            {{/if}}
+        </section>
+
+        <section id="trending-books" class="container-fluid">
+            <h2>Trending Books</h2>
+            {{#if trendingBooks}}
+                <ul class="row">
+                    {{#each trendingBooks}}
+                        <li class="col-2 d-flex justify-content-center">
+                            <div class=" card book-card bg-1 h-100">
+                                <img src="{{this.volumeInfo.imageLinks.smallThumbnail}}" alt="{{this.volumeInfo.title}} Cover" class="card-img-top book-cover">
+                                <div class="card-body book-info bg-light rounded-bottom">
+                                    <!--<p class="card-title">{{this.volumeInfo.title}}</p> commented out because displayed in thumbnail, maybe add tooltip?
+                                    <p class="card-text">{{this.volumeInfo.authors.[0]}}</p>--> 
+                                    <a href="/book/{{this.id}}" class="btn btn-primary">View Details</a>
+                                </div>
+                            </div>
+                        </li>
+                    {{/each}}
+                </ul><br>
+            {{else}}
+                <p>No trending books at the moment. Check back later!</p>
             {{/if}}
         </section>
 
@@ -42,9 +66,9 @@
                 <p>No top reviews available right now.</p>
             {{/if}}
         </section>
-    </main>
 
-    <footer>
-        <p>© 2024 BookHive | All Rights Reserved</p>
-    </footer>
+        <section><br></section>
+        <section><br></section> <!--  padding added to prevent footer overlap   -->
+        <section><br></section>
+    </main>
 </body>
