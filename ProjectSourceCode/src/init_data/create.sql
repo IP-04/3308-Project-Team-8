@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 	description VARCHAR(500)
 );
 
+DROP TABLE IF EXISTS books CASCADE;
 CREATE TABLE IF NOT EXISTS books (
 	id SERIAL PRIMARY KEY,
 	title VARCHAR(2000),
@@ -43,6 +44,11 @@ CREATE TABLE IF NOT EXISTS users_to_profiles (
 
 CREATE TABLE IF NOT EXISTS reviews_to_books (
 	review_id SMALLINT,
+	book_id SMALLINT
+);
+
+CREATE TABLE IF NOT EXISTS profiles_to_books (
+	profile_id SMALLINT,
 	book_id SMALLINT
 );
 

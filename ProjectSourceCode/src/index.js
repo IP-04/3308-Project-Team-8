@@ -99,85 +99,15 @@ app.get('/home', (req, res) => {
     },
   })
     .then(results => {
-      // populate database with API data, all book table data except avg_rating comes from API
-      var avg_rating_q = `SELECT AVG(rating) 
-                          FROM reviews 
-                          INNER JOIN reviews_to_books
-                            ON reviews.id = review_id
-                          INNER JOIN books
-                            ON reviews_to_books.book_id = books.id
-                          GROUP BY books.id
-                          HAVING books.google_volume = ($1)`; // calculates average rating in SQL
-      // insert API data into SQL
-      var insert_bulk = `INSERT INTO books (title, author, thumbnail_link, avg_rating, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
       
-      const title = []; // define vars outside of loop
-      const author = [];
-      const thumbnail = [];
-      const desc = [];
-      const sample = [];
-      const purchase = [];
-      const google_vol = [];
       const google_books = results.data.items;
-
-      for (let i = 0; i < 40; i++) { // populate data of all 40 returned books from API into const vars
-        title[i] = google_books[i].volumeInfo.title;
-        if (google_books[i].volumeInfo.authors) {author[i] = google_books[i].volumeInfo.authors[0];}
-        if(google_books[i].volumeInfo.imageLinks) {thumbnail[i] = google_books[i].volumeInfo.imageLinks.smallThumbnail;}
-        desc[i] = google_books[i].volumeInfo.description;
-        sample[i] = google_books[i].volumeInfo.previewLink;
-        purchase[i] = google_books[i].volumeInfo.infoLink;
-        google_vol[i] = google_books[i].id;
+      var featuredBooks;
+      if (user) {
+        featuredBooks = google_books.slice(1,7); // temporary || make based off friends and preferencecs if user logged in
+      } else {
+        featuredBooks = google_books.slice(1,7); // this determines what books are displayed
       }
-      const featuredBooks = google_books.slice(1,7); // this determines what books are displayed
       const trendingBooks = google_books.slice(7,13);
-
-      /*for(let i = 0; i < 10; i++) { // mix const vars with SQL query to populate database
-        db.one(avg_rating_q, [google_vol[i]])
-          .then(results => {
-            db.any(insert_bulk, [
-              title[i],
-              author[i],
-              thumbnail[i],
-              results,
-              desc[i],
-              sample[i],
-              purchase[i],
-              google_vol[i],
-            ])
-              .catch(function (err) {
-                //return console.log(err);
-            })
-          })
-          .catch(function (err) { // if an average rating cannot be calculated, populate with it as 0
-            db.any(insert_bulk, [
-              title[i],
-              author[i],
-              thumbnail[i],
-              0,
-              desc[i],
-              sample[i],
-              purchase[i],
-              google_vol[i],
-            ])
-            .catch(function (err) {
-              //return console.log(err);
-            })
-          })
-      }*/
-
-      /*/ populates featuredBooks for home page display (NOT WORKING)
-      var featuredBooks = [];
-      const featured_q = `SELECT * FROM books`; 
-      db.any(featured_q)
-        .then(results => {
-          featuredBooks = results;
-          console.log(results);
-        })
-        .catch(function (err) {
-          return console.log(err);
-        })
-      console.log(featuredBooks);*/
       
       // render home page
       res.render('pages/home',{
@@ -246,6 +176,7 @@ app.get('/profile', (req, res) => {
 //Usedd bcrypt instead of bcryptjs
 // it works by hashing the password and comparing it to the hashed password in the database
 app.get('/login', (req, res) => {
+  if (req.session.user) {res.redirect('/');}
   res.render('pages/login');
 });
 
@@ -256,11 +187,65 @@ app.post('/login', async (req, res) => {
     if (user && bcrypt.compareSync(password, user.password)) { //`bcrypt.compareSync` compares the password entered by the user with the hashed password in the database
       req.session.user = user;
       req.session.save();
+
+        // Call API to populate book database tables upon loading /home
+        const param_q = 'e';
+        const param_maxResults = 40; // cannot exceed 40, limitation set by google
+        await axios({
+          url: `https://www.googleapis.com/books/v1/volumes`,
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+            'Accept-Encoding': 'application/json',
+          },
+          params: {
+            key: process.env.API_KEY,
+            q: param_q,
+            maxResults: param_maxResults // cannot exceed 40, limitation set by google
+          },
+        })
+        .then(results => {
+          const books = results.data.items;
+          for (let i = 0; i < param_maxResults; i++) {
+            var title = books[i].volumeInfo.title;
+            if (books[i].volumeInfo.authors) {var author = books[i].volumeInfo.authors[0];}
+            if(books[i].volumeInfo.imageLinks) {var thumbnail = books[i].volumeInfo.imageLinks.smallThumbnail;}
+            var desc = books[i].volumeInfo.description;
+            var sample = books[i].volumeInfo.previewLink;
+            var purchase = books[i].volumeInfo.infoLink;
+            var google_vol = books[i].id;
+
+            //console.log(google_vol);
+
+            // NO AVG RATING INSERTION (intentional)
+            var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
+            db.any(query, [
+              title,
+              author,
+              thumbnail,
+              desc,
+              sample,
+              purchase,
+              google_vol,
+            ])
+            /*.then(results => {
+              console.log(results);
+            })*/
+            .catch(error => {
+              console.log(error);
+            });
+          }
+        })
+        .catch(err => {
+          res.status(500).send('Database failed to populate');
+        });
+          
       res.status(302).redirect('/home');
     } else {
       res.status(401).send('Invalid username or password');
     }
   } catch (error) {
+    console.log(error);
     res.status(500).send('Internal server error');
   }
 });
@@ -269,6 +254,7 @@ app.post('/login', async (req, res) => {
 
 // Register route
 app.get('/register', (req, res) => {
+  if (req.session.user) {res.redirect('/');}
   res.render('pages/register');
 });
 
@@ -277,6 +263,10 @@ app.post('/register', async (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10); //`bcrypt.hashSync` hashes the password entered by the user
   try {
     await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+
+    const profile_query = `INSERT INTO profiles (username, description) VALUES ($1, $2);`;
+    await db.none(profile_query, [username, "Add a Description of Yourself!"])
+
     res.status(200).redirect('/login');
   } catch (error) {
     res.status(400).send('Invalid input');
