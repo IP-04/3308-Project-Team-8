@@ -79,10 +79,11 @@ app.get('/', (req, res) => {
 });
 
 // Home route
-app.get('/home', (req, res) => {
+app.get('/home', async (req, res) => {
   const user = req.session.user;
   var username = "Guest";
   if (user) {username = user.username;}
+
   
   // Call API to populate book database tables upon loading /home
   axios({
@@ -103,7 +104,7 @@ app.get('/home', (req, res) => {
       const google_books = results.data.items;
       var featuredBooks;
       if (user) {
-        featuredBooks = google_books.slice(1,7); // temporary || make based off friends and preferencecs if user logged in
+        // temporary || make based off friends and preferencecs if user logged in
       } else {
         featuredBooks = google_books.slice(1,7); // this determines what books are displayed
       }
@@ -121,9 +122,6 @@ app.get('/home', (req, res) => {
     .catch(error => {
       console.log(error);
       res.status(404);
-      res.render('pages/home',{
-        books: []
-      });
       // Handle errors
     });
 });
@@ -251,7 +249,8 @@ app.post('/login', async (req, res) => {
             res.status(500).send('Database failed to populate');
           });
         }
-      }   
+      }
+
       res.status(302).redirect('/home');
     } else {
       res.status(401).send('Invalid username or password');

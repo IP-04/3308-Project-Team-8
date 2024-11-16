@@ -1,4 +1,4 @@
-function checkSession(username) {
+/*function checkSession(username) {
     const loginBtn = document.getElementById('loginbtn');
     const logoutBtn = document.getElementById('logoutbtn');
     const registerBtn = document.getElementById('registerbtn');
@@ -17,7 +17,7 @@ function checkSession(username) {
         registerBtn.classList.replace('nav-item', 'hidden');
     }
     
-}
+}*/
 //function to change visibility of the password on click
 function togglePasswordVisibility(){
 	var x = document.getElementById("password");
