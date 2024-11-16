@@ -188,58 +188,70 @@ app.post('/login', async (req, res) => {
       req.session.user = user;
       req.session.save();
 
-        // Call API to populate book database tables upon loading /home
-        const param_q = 'e';
-        const param_maxResults = 40; // cannot exceed 40, limitation set by google
-        await axios({
-          url: `https://www.googleapis.com/books/v1/volumes`,
-          method: 'GET',
-          dataType: 'json',
-          headers: {
-            'Accept-Encoding': 'application/json',
-          },
-          params: {
-            key: process.env.API_KEY,
-            q: param_q,
-            maxResults: param_maxResults // cannot exceed 40, limitation set by google
-          },
-        })
-        .then(results => {
-          const books = results.data.items;
-          for (let i = 0; i < param_maxResults; i++) {
-            var title = books[i].volumeInfo.title;
-            if (books[i].volumeInfo.authors) {var author = books[i].volumeInfo.authors[0];}
-            if(books[i].volumeInfo.imageLinks) {var thumbnail = books[i].volumeInfo.imageLinks.smallThumbnail;}
-            var desc = books[i].volumeInfo.description;
-            var sample = books[i].volumeInfo.previewLink;
-            var purchase = books[i].volumeInfo.infoLink;
-            var google_vol = books[i].id;
-
-            //console.log(google_vol);
-
-            // NO AVG RATING INSERTION (intentional)
-            var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
-            db.any(query, [
-              title,
-              author,
-              thumbnail,
-              desc,
-              sample,
-              purchase,
-              google_vol,
-            ])
-            /*.then(results => {
-              console.log(results);
-            })*/
-            .catch(error => {
-              console.log(error);
+      let is_populated = false;
+      const is_populated_query = `SELECT google_volume FROM books WHERE id = 1;`;
+      await db.oneOrNone(is_populated_query)
+            .then(results => {
+              if(results) {is_populated = true;}
             });
-          }
-        })
-        .catch(err => {
-          res.status(500).send('Database failed to populate');
-        });
-          
+
+      if (!is_populated) {
+        const param_q = ['e','a','t','s'];
+        const param_maxResults = 40; // cannot exceed 40, limitation set by google
+        
+        for(var j = 0; j < 4; j++) {
+          var loop_q = param_q[j];
+          // Call API to populate book database tables upon loading /home
+          await axios({
+            url: `https://www.googleapis.com/books/v1/volumes`,
+            method: 'GET',
+            dataType: 'json',
+            headers: {
+              'Accept-Encoding': 'application/json',
+            },
+            params: {
+              key: process.env.API_KEY,
+              q: loop_q,
+              maxResults: param_maxResults // cannot exceed 40, limitation set by google
+            },
+          })
+          .then(results => {
+            const books = results.data.items;
+            for (let i = 0; i < param_maxResults; i++) {
+              var title = books[i].volumeInfo.title;
+              if (books[i].volumeInfo.authors) {var author = books[i].volumeInfo.authors[0];}
+              if(books[i].volumeInfo.imageLinks) {var thumbnail = books[i].volumeInfo.imageLinks.smallThumbnail;}
+              var desc = books[i].volumeInfo.description;
+              var sample = books[i].volumeInfo.previewLink;
+              var purchase = books[i].volumeInfo.infoLink;
+              var google_vol = books[i].id;
+
+              //console.log(google_vol);
+
+              // NO AVG RATING INSERTION (intentional)
+              var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
+              db.any(query, [
+                title,
+                author,
+                thumbnail,
+                desc,
+                sample,
+                purchase,
+                google_vol,
+              ])
+              /*.then(results => {
+                console.log(results);
+              })*/
+              .catch(error => {
+                console.log(error);
+              });
+            }
+          })
+          .catch(err => {
+            res.status(500).send('Database failed to populate');
+          });
+        }
+      }   
       res.status(302).redirect('/home');
     } else {
       res.status(401).send('Invalid username or password');

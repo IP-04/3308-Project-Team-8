@@ -10,11 +10,11 @@ CREATE TABLE IF NOT EXISTS profiles (
 	description VARCHAR(500)
 );
 
-DROP TABLE IF EXISTS books CASCADE;
+DROP TABLE IF EXISTS books;
 CREATE TABLE IF NOT EXISTS books (
 	id SERIAL PRIMARY KEY,
-	title VARCHAR(2000),
-	author VARCHAR(50),
+	title VARCHAR(1000),
+	author VARCHAR(200),
 	thumbnail_link VARCHAR(200),
 	avg_rating FLOAT,
 	description VARCHAR(5000),
