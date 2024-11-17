@@ -1,4 +1,48 @@
     <main class="ms-3">
+
+        <!-- Modal elements -->
+        <div class="modal" tabindex="-1" id="review-modal">
+            <div class="modal-dialog">
+            <div class="modal-content bg-1">
+                <div class="modal-header">
+                    <h5 class="modal-title">Leave a Review</h5>
+                </div>
+                <div class="modal-body bg-2"></div>
+                    <form id="review-form" ><!--action="/book/{{book.google_volume}}/review" method="POST"-->
+                        <!-- Include form fields to gather the information listed below. -->
+                        <div class="row mb-3">
+                            <label class="form-label col-sm-3 ms-3"><strong>Review Title</strong></label>
+                            <input class="col-sm-8" type="text" id="review_title" name="title" pattern=".{1,30}">
+                        </div>
+                        <div class="row mb-3">
+                            <label class="form-label col-sm-3 ms-3"><strong>Rating</strong></label>
+                            <input class="col-sm-8" type="text" id="review_rating" name="rating" pattern="[0-5]|[0-5]\.[0-5]">
+                        </div>
+                        <div class="row mb-3">
+                            <label class="form-label col-sm-3 ms-3"><strong>Description</strong></label><br>
+                            <input class="col-sm-8 h-20" type="text" id="review_desc" name="description" pattern=".{1,250}" style="height: 100px">
+                        </div>
+                        <div class="row mb-3">
+                            <label class="form-label col-sm-3 ms-3"><strong>Visibility</strong></label>
+                            <select class="col-sm-8" id="review_visibility" name="visibility" class="form-select">
+                                <option value="true">Public</option>
+                                <option value="false">Friends Only</option>
+                            </select>
+                        </div>
+                            <input type="hidden" value="{{book.google_volume}}" id="review_google_vol">
+                        
+                        <button id="close_button" class="btn btn-secondary ms-3" type="close">
+                        Cancel
+                        </button>
+                        <button id="submit_button" class="btn btn-primary" type="submit">
+                        Add Review
+                        </button>
+                    </form>      
+                <div class="modal-footer bg-2"></div>
+            </div>
+            </div>
+        </div>
+
         <section class="book-details" style="padding: 20px">
             <div class="row">
                 <div class="col-4 d-flex justify-content-center">
@@ -7,18 +51,11 @@
                     </div>
                 </div>
 
-                <section class="existing-reviews col-8">
+                <section class="col-8" id="existing-reviews">
                     <h2>User Reviews</h2>
                     {{#if reviews.length}}
-                        <ul>
-                            {{#each reviews}}
-                                {{#if reviews.visibility}}
-                                <li>
-                                    <strong>{{this.username}}</strong> - Rating: {{this.rating}}/5
-                                    <p>{{this.description}}</p>
-                                </li>
-                                {{/if}}
-                            {{/each}}
+                        <ul id="review-list">
+                            
                         </ul>
                     {{else}}
                         <p>No reviews for this book yet. Be the first to review!</p>
@@ -27,7 +64,7 @@
 
             </div>
             <div class="row justify-content-end" style="padding: 10px">
-                <button class="btn col-2 btn-primary" onclick="openEventModal()">Leave a Review</button>
+                <button class="btn col-2 btn-primary" onclick="openReviewModal()">Leave a Review</button>
                 <div class="col-1"></div>
                 <a href="/book/{{this.id}}/review" class="btn col-2 btn-primary">View all Reviews</a>
                 <div class="col-1"></div>
@@ -53,47 +90,7 @@
             </form>
         </section>-->
 
-        <!-- Modal elements -->
-        <div class="modal" tabindex="-1" id="event-modal">
-            <div class="modal-dialog">
-            <div class="modal-content bg-1">
-                <div class="modal-header">
-                    <h5 class="modal-title">Leave a Review</h5>
-                </div>
-                <div class="modal-body bg-2"></div>
-                    <form action="/book/{{book.google_volume}}/review" method="POST">
-                        <!-- Include form fields to gather the information listed below. -->
-                        <div class="row mb-3">
-                            <label class="form-label col-sm-3 ms-3"><strong>Review Title</strong></label>
-                            <input class="col-sm-8" type="text" id="review_title" name="title" pattern=".{1,30}">
-                        </div>
-                        <div class="row mb-3">
-                            <label class="form-label col-sm-3 ms-3"><strong>Rating</strong></label>
-                            <input class="col-sm-8" type="text" id="review_rating" name="rating" pattern="[0-5]|[0-5]\.[0-5]">
-                        </div>
-                        <div class="row mb-3">
-                            <label class="form-label col-sm-3 ms-3"><strong>Description</strong></label><br>
-                            <input class="col-sm-8 h-20" type="text" id="review_desc" name="description" pattern=".{1,250}" style="height: 100px">
-                        </div>
-                        <div class="row mb-3">
-                            <label class="form-label col-sm-3 ms-3"><strong>Visibility</strong></label>
-                            <select class="col-sm-8" id="review_visibility" name="visibility" class="form-select">
-                                <option value="true">Public</option>
-                                <option value="false">Friends Only</option>
-                            </select>
-                            </div>
-                        
-                        <button id="close_button" class="btn btn-secondary ms-3" type="close">
-                        Cancel
-                        </button>
-                        <button id="submit_button" class="btn btn-primary" type="submit">
-                        Add Review
-                        </button>
-                    </form>      
-                <div class="modal-footer bg-2"></div>
-            </div>
-            </div>
-        </div>
+        
 
         <section></section><br>
         <section></section><br>

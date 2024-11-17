@@ -1,0 +1,14 @@
+<main class="ms-3">
+    {{#if reviews.length}}
+        <ul>
+            {{#each reviews}}
+                {{#if reviews.visibility}}
+                    <li class="card">
+                        <strong>{{this.username}}</strong> - Rating: {{this.rating}}/5
+                        <p>{{this.description}}</p>
+                    </li>
+                    {{/if}}
+            {{/each}}
+        </ul>
+    {{/if}}
+</main>

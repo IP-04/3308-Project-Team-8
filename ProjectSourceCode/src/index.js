@@ -273,10 +273,12 @@ app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10); //`bcrypt.hashSync` hashes the password entered by the user
   try {
-    await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+    var user_id = await db.one('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id;', [username, hashedPassword]);
 
-    const profile_query = `INSERT INTO profiles (username, description) VALUES ($1, $2);`;
-    await db.none(profile_query, [username, "Add a Description of Yourself!"])
+    const profile_query = `INSERT INTO profiles (username, description) VALUES ($1, $2) RETURNING id;`;
+    var profile_id = await db.one(profile_query, [username, "Add a Description of Yourself!"]);
+
+    await db.none('INSERT INTO users_to_profiles (user_id, profile_id) VALUES ($1, $2);', [user_id.id, profile_id.id]);
 
     res.status(200).redirect('/login');
   } catch (error) {
@@ -302,11 +304,13 @@ app.get('/book', (req, res) => {
 });
 
 app.get('/book/:id', async (req, res) => {
-  const book_google_vol = req.params.id;
+  const book_google_vol = `${req.params.id}`;
   try {
     const book = await db.oneOrNone('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
     const reviews = await db.any('SELECT * FROM reviews LEFT JOIN reviews_to_books ON reviews.id = reviews_to_books.review_id LEFT JOIN reviews_to_profiles ON reviews.id = reviews_to_profiles.review_id LEFT JOIN profiles ON reviews_to_profiles.profile_id = profiles.id WHERE book_id = $1;', [book.id]);
-    res.render('pages/book', { book, reviews});
+    //console.log(book);
+    //console.log(reviews);
+    res.render('pages/book', { book: book, reviews: reviews});
   } catch (error) {
     console.log(error);
     res.status(500).send('Error fetching book details');
@@ -325,7 +329,7 @@ app.get('/book/:id/review', async (req, res) => {
   try {
     await db.any('SELECT FROM reviews WHERE google_volume = $1;', [bookId])
     .then(results => {
-      res.render(`pages/reviews`,{reviews: results, google_vol: bookId});
+      res.render(`pages/reviews`,{user: user, reviews: results, google_vol: bookId});
     });
   } catch (error) {
     res.status(500).send('Error submitting review');
@@ -333,8 +337,8 @@ app.get('/book/:id/review', async (req, res) => {
 });
 
 app.post('/book/:id/review', async (req, res) => {
-  const bookId = req.params.id;
-  const {google_volume, title, description, rating, visibility } = req.body;
+  const google_volume = req.params.id;
+  const {title, description, rating, visibility } = req.body;
   const user = req.session.user;
   if (!user) {
     res.status(401).send('Please log in to submit a review');
@@ -342,19 +346,36 @@ app.post('/book/:id/review', async (req, res) => {
   }
 
   try {
-    await db.none('INSERT INTO reviews (google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5)', [bookId, title, description, rating, visibility]);
-    await db.any(`SELECT * FROM reviews WHERE google_volume = $1;`, [bookId])
+    var review_id = await db.one('INSERT INTO reviews (google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5) RETURNING id;', [google_volume, title, description, rating, visibility]);
+    var book_id = await db.one('SELECT id FROM books WHERE google_volume = $1;',[google_volume]);
+    
+    await db.none('INSERT INTO reviews_to_books (review_id, book_id) VALUES ($1, $2);', [review_id.id, book_id.id]);
+    await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
+    /*await db.any(`SELECT * FROM reviews WHERE google_volume = $1;`, [google_volume])
     .then(results => {
       res.render(`pages/reviews`,{
+        user: user,
         reviews: results,
         google_vol: google_volume
       });
-      //res.redirect(`/book/${bookId}`);
-    })
+      res.redirect('/reviews');
+      
+    })*/
+    res.redirect(`/book/${google_volume}`);
     
   } catch (error) {
     res.status(500).send('Error submitting review');
   }
+});
+
+app.get('/reviews', async (req, res) => {
+  const user = req.body.user;
+  if (!user) {
+    res.status(401).send('Please log in to view all reviews');
+    return;
+  }
+
+  res.render('pages/reviews', {user: user, reviews: req.body.reviews});
 });
 
 // Logout route

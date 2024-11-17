@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
 	id SERIAL PRIMARY KEY,
-	username VARCHAR(50),
+	username VARCHAR(50) UNIQUE,
 	password CHAR(60) NOT NULL
 );
 
@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS books (
 	description VARCHAR(5000),
 	sample VARCHAR(5000),
 	purchase_link VARCHAR(200),
-	google_volume VARCHAR(12) NOT NULL UNIQUE
-);
+	google_volume VARCHAR(12) NOT NULL UNIQUE 
+); 
 
 CREATE TABLE IF NOT EXISTS reviews (
 	id SERIAL PRIMARY KEY,
