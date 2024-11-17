@@ -1,0 +1,63 @@
+    <main class="ms-3" onload="initializeEventModal()">
+        <section class="book-details" style="padding: 20px">
+            <div class="row">
+                <div class="col-4 d-flex justify-content-center">
+                    <div class="book-card row">
+                        <img src="{{book.thumbnail_link}}" alt="{{book.title}} Cover" class="book-cover">
+                    </div>
+                </div>
+
+                <section class="existing-reviews col-8">
+                    <h2>User Reviews</h2>
+                    {{#if reviews.length}}
+                        <ul>
+                            {{#each reviews}}
+                                {{#if reviews.visibility}}
+                                <li>
+                                    <strong>{{this.username}}</strong> - Rating: {{this.rating}}/5
+                                    <p>{{this.description}}</p>
+                                </li>
+                                {{/if}}
+                            {{/each}}
+                        </ul>
+                    {{else}}
+                        <p>No reviews for this book yet. Be the first to review!</p>
+                    {{/if}}
+                </section>
+
+            </div>
+            <div class="row justify-content-end" style="padding: 10px">
+                <a href="/book/{{this.id}}/review" class="btn col-2 btn-primary">Leave a Review</a>
+                <div class="col-1"></div>
+                <a href="/book/{{this.id}}/review" class="btn col-2 btn-primary">View all Reviews</a>
+                <div class="col-1"></div>
+            </div>
+            <div class="row">
+                <h1 style="padding: 10px">{{book.title}}</h1><br>
+                <p><strong>Author:</strong> {{book.author}}</p><br>
+                <p><strong>Description:</strong></p>
+                <p>{{book.description}}</p>
+            </div>
+        </section>
+
+        <!--<section class="review-section">
+            <h2>Write a Review</h2>
+            <form action="/book/{{book.id}}/review" method="POST">
+                <label for="rating">Rating (1-5)</label><br>
+                <input type="number" id="rating" name="rating" min="1" max="5" required><br>
+                
+                <label for="reviewText">Your Review</label><br>
+                <textarea id="reviewText" name="reviewText" rows="4" required></textarea><br>
+                
+                <input type="submit" value="Submit Review">
+            </form>
+        </section>-->
+
+        <section></section><br>
+        <section></section><br>
+        <section></section>
+        <section></section>
+    </main>
+
+</body>
+
