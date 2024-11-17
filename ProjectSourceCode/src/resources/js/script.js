@@ -23,8 +23,11 @@ let EVENT_MODAL;
 function initializeEventModal() {
     // Create a modal using JS. The id will be `event-modal`:
     // Reference: https://getbootstrap.com/docs/5.3/components/modal/#via-javascript
-    EVENT_MODAL = new bootstrap.Modal(document.getElementById('event-modal'))
-  }
+    EVENT_MODAL = new bootstrap.Modal(document.getElementById('event-modal'));
+}
+function openEventModal() {
+    EVENT_MODAL.show();
+}
 
 //function to change visibility of the password on click
 function togglePasswordVisibility(){

@@ -313,9 +313,28 @@ app.get('/book/:id', async (req, res) => {
   }
 });
 // review route
+app.get('/book/:id/review', async (req, res) => {
+  const bookId = req.params.id;
+  
+  const user = req.session.user;
+  if (!user) {
+    res.status(401).send('Please log in to view all reviews');
+    return;
+  }
+
+  try {
+    await db.any('SELECT FROM reviews WHERE google_volume = $1;', [bookId])
+    .then(results => {
+      res.render(`pages/reviews`,{reviews: results, google_vol: bookId});
+    });
+  } catch (error) {
+    res.status(500).send('Error submitting review');
+  }
+});
+
 app.post('/book/:id/review', async (req, res) => {
   const bookId = req.params.id;
-  const { google_vol, title, description, rating, visibility } = req.body;
+  const {google_volume, title, description, rating, visibility } = req.body;
   const user = req.session.user;
   if (!user) {
     res.status(401).send('Please log in to submit a review');
@@ -323,8 +342,16 @@ app.post('/book/:id/review', async (req, res) => {
   }
 
   try {
-    await db.none('INSERT INTO reviews (google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5)', [google_vol, title, description, rating, visibility]);
-    res.redirect(`/book/${bookId}`);
+    await db.none('INSERT INTO reviews (google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5)', [bookId, title, description, rating, visibility]);
+    await db.any(`SELECT * FROM reviews WHERE google_volume = $1;`, [bookId])
+    .then(results => {
+      res.render(`pages/reviews`,{
+        reviews: results,
+        google_vol: google_volume
+      });
+      //res.redirect(`/book/${bookId}`);
+    })
+    
   } catch (error) {
     res.status(500).send('Error submitting review');
   }
