@@ -15,4 +15,5 @@
     <!-- Path to css file -->
     <link rel="stylesheet" href="../../resources/css/style.css" />
 </head>
-<body class="d-flex flex-column min-vh-100" onload="initializeReviews('{{reviews}}')">
+    <body class="d-flex flex-column min-vh-100" onload="if(document.getElementById('review-modal')){initializeReviews({{json reviews}});}">
+

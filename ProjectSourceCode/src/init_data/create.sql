@@ -25,11 +25,12 @@ CREATE TABLE IF NOT EXISTS books (
 
 CREATE TABLE IF NOT EXISTS reviews (
 	id SERIAL PRIMARY KEY,
+	username VARCHAR(50),
 	google_volume VARCHAR(12) NOT NULL,
 	title VARCHAR(30),
 	description VARCHAR(250),
 	rating FLOAT,
-	visibility BOOL
+	visibility BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS friends (
