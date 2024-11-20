@@ -388,3 +388,8 @@ app.get('/logout', (req, res) => {
 module.exports = app.listen(3000, () => {
   console.log('Server is listening on port 3000');
 });
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null; // Assumes you use session for authentication
+  next();
+});
