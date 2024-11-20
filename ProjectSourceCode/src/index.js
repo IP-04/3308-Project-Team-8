@@ -355,7 +355,6 @@ app.post('/addReview', async (req, res) => {
     await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
     
     res.status(200);
-    //res.redirect(`/book/${{google_volume}}`); // redirect back to book details page
     
   } catch (error) {
     res.status(500).send('Error submitting review');
@@ -364,14 +363,17 @@ app.post('/addReview', async (req, res) => {
 
 // view all reviews for one book route
 app.get('/reviews/:id', async (req, res) => {
-  const user = req.body.user;
+  const book_google_vol = `${req.params.id}`;
+  const user = req.session.user;
 
   if (!user) {
     res.status(401).send('Please log in to view all reviews'); // user auth
     return;
   }
 
-  res.render('pages/reviews', {user: user, reviews: req.body.reviews});
+  var reviews = await db.any('SELECT * FROM reviews WHERE google_volume = $1', [book_google_vol]);
+
+  res.render('pages/reviews', {user, reviews});
 });
 
 // Logout route

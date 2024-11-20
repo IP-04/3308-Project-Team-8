@@ -38,23 +38,25 @@ function createBootstrapCard(id) {
     return card;
 }
 // Review data populating in Title
-function createReviewTitle(text) {
+function createReviewTitle(text, rating) {
     const title = document.createElement('div');
     title.className = 'h6 text-start position-relative py-0';
-    title.innerHTML = text;
+    title.innerHTML = rating + '/5.0 - ' + text;
     return title;
 }
 // Review data populating rating and username
-function createReviewRating(username, rating) {
-    const info = document.createElement('div');
-    info.className = 'h7 text-start position-relative py-0';
-    info.innerHTML = username + ' - Rating: ' + rating + '/5.0';
-    return info;
+function createReviewUser(username) {
+    const user_link = document.createElement('a');
+    user_link.className = 'h8 text-start position-relative py-0';
+    user_link.innerHTML = 'Reviewed by: ' + username;
+    user_link.href = `/user/${{username}}`;
+    user_link.style = 'text-decoration: none; color: #d19c1d;';
+    return user_link;
 }
 // Review data populating decription
 function createReviewDesc(text) {
     const desc = document.createElement('div');
-    desc.className = 'h8 text-start position-relative py-1';
+    desc.className = 'h7 text-start position-relative py-1';
     desc.innerHTML = text;
     return desc;
 }
@@ -165,21 +167,22 @@ function updateDOM() {
             review_card.remove();
         }
 
-        var card = createBootstrapCard(current_review.id);
-        console.log(card);
+        if(current_review.visibility) {
+            var card = createBootstrapCard(current_review.id);
 
-        container.appendChild(card);
-        
-        var card_title = createReviewTitle(current_review.title);
-        card.appendChild(card_title);
+            container.appendChild(card);
+            
+            var card_title = createReviewTitle(current_review.title, current_review.rating);
+            card.appendChild(card_title);
 
-        var card_rating = createReviewRating(current_review.username, current_review.rating);
-        card.appendChild(card_rating);
+            var card_user = createReviewUser(current_review.username);
+            card.appendChild(card_user);
 
-        var card_desc = createReviewDesc(current_review.description);
-        card.appendChild(card_desc);
+            var card_desc = createReviewDesc(current_review.description);
+            card.appendChild(card_desc);
 
-        console.log(card);
+            console.log(card);
+        }
     }
 }
 
