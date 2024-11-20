@@ -15,20 +15,25 @@
       <!-- Navbar content (logo and links) -->
       <div class="collapse navbar-collapse" id="navbar-collapse">
         <!-- Logo and primary navigation links -->
-        <a class="navbar-brand" href="../home">
+        <a class="navbar-brand" href="/home">
           <img src="../../resources/img/Beehive_Logo.png" alt="Beehive Logo" width="30" height="24">
         </a>
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="/discover">Discover</a></li>
-          <li class="nav-item" id="profilebtn"><a class="nav-link" href="/profile">Profile</a></li>
+          {{#if user}}
+            <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+          {{/if}}
         </ul>
 
         <!-- Login/Register/Logout buttons -->
         <div class="navbar-nav ms-auto">
-          <li class="nav-item" id="registerbtn"><a class="nav-link" href="/register">Register</a></li>
-          <li class="nav-item" id="loginbtn"><a class="nav-link" href="/login">Login</a></li>
-          <li class="nav-item" id="logoutbtn"><a class="nav-link" href="/logout">Logout</a></li>
+          {{#if user}}
+            <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+          {{else}}
+            <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+            <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+          {{/if}}
         </div>
       </div>
     </div>
