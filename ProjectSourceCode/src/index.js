@@ -67,6 +67,14 @@ app.use(
 );
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const Handlebars = require('handlebars');
+
+// Register a custom helper to serialize data to JSON
+Handlebars.registerHelper('json', function(context) {
+  return JSON.stringify(context);
+});
+
+
 // *****************************************************
 // <!-- Section 4 : API Routes -->
 // *****************************************************
@@ -78,14 +86,14 @@ app.get('/', (req, res) => {
   res.redirect('/home');
 });
 
-// Home route
+// Home  get route
 app.get('/home', async (req, res) => {
   const user = req.session.user;
   var username = "Guest";
   if (user) {username = user.username;}
 
   
-  // Call API to populate book database tables upon loading /home
+  // Call API to populate books display upon loading /home
   axios({
     url: `https://www.googleapis.com/books/v1/volumes`,
     method: 'GET',
@@ -99,7 +107,7 @@ app.get('/home', async (req, res) => {
       maxResults: 40 // cannot exceed 40, limitation set by google
     },
   })
-    .then(results => {
+    .then(results => { // process data from API
       
       const google_books = results.data.items;
       var featuredBooks;
@@ -111,7 +119,7 @@ app.get('/home', async (req, res) => {
       const trendingBooks = google_books.slice(7,13);
       
       // render home page
-      res.render('pages/home',{
+      res.render('pages/home',{ // render home page while passing data
           user: user,
           username: username,
           books: google_books,
@@ -171,33 +179,34 @@ app.get('/profile', (req, res) => {
 });
 
 // Login route
-//Usedd bcrypt instead of bcryptjs
+//Used bcrypt instead of bcryptjs
 // it works by hashing the password and comparing it to the hashed password in the database
 app.get('/login', (req, res) => {
-  if (req.session.user) {res.redirect('/');}
+  if (req.session.user) {res.redirect('/');} // check if user is already logged in
   res.render('pages/login');
 });
 
+// login submission route
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]); // fetch user details from database
     if (user && bcrypt.compareSync(password, user.password)) { //`bcrypt.compareSync` compares the password entered by the user with the hashed password in the database
       req.session.user = user;
       req.session.save();
 
-      let is_populated = false;
+      let is_populated = false; // is books database already populated
       const is_populated_query = `SELECT google_volume FROM books WHERE id = 1;`;
       await db.oneOrNone(is_populated_query)
             .then(results => {
               if(results) {is_populated = true;}
             });
 
-      if (!is_populated) {
+      if (!is_populated) { // if the database isn't already populated, populate it
         const param_q = ['e','a','t','s'];
         const param_maxResults = 40; // cannot exceed 40, limitation set by google
         
-        for(var j = 0; j < 4; j++) {
+        for(var j = 0; j < 4; j++) { // loop 4 different api calls with different search queries (this upgrades imported books from 40 to 160)
           var loop_q = param_q[j];
           // Call API to populate book database tables upon loading /home
           await axios({
@@ -213,7 +222,7 @@ app.post('/login', async (req, res) => {
               maxResults: param_maxResults // cannot exceed 40, limitation set by google
             },
           })
-          .then(results => {
+          .then(results => { // save results as variables for clarity
             const books = results.data.items;
             for (let i = 0; i < param_maxResults; i++) {
               var title = books[i].volumeInfo.title;
@@ -228,7 +237,7 @@ app.post('/login', async (req, res) => {
 
               // NO AVG RATING INSERTION (intentional)
               var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
-              db.any(query, [
+              db.any(query, [ // books data inserted into database
                 title,
                 author,
                 thumbnail,
@@ -251,7 +260,7 @@ app.post('/login', async (req, res) => {
         }
       }
 
-      res.status(302).redirect('/home');
+      res.status(302).redirect('/home'); // redirecet to home after populating database
     } else {
       res.status(401).send('Invalid username or password');
     }
@@ -265,18 +274,22 @@ app.post('/login', async (req, res) => {
 
 // Register route
 app.get('/register', (req, res) => {
-  if (req.session.user) {res.redirect('/');}
+  if (req.session.user) {res.redirect('/');} // check if user is already logged in
   res.render('pages/register');
 });
 
+// register submission route
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10); //`bcrypt.hashSync` hashes the password entered by the user
   try {
-    await db.none('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
-
-    const profile_query = `INSERT INTO profiles (username, description) VALUES ($1, $2);`;
-    await db.none(profile_query, [username, "Add a Description of Yourself!"])
+    // insert new user into database
+    var user_id = await db.one('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id;', [username, hashedPassword]);
+    // create a profile entry for user
+    const profile_query = `INSERT INTO profiles (username, description) VALUES ($1, $2) RETURNING id;`;
+    var profile_id = await db.one(profile_query, [username, "Add a Description of Yourself!"]);
+    // link user table to profile table
+    await db.none('INSERT INTO users_to_profiles (user_id, profile_id) VALUES ($1, $2);', [user_id.id, profile_id.id]);
 
     res.status(200).redirect('/login');
   } catch (error) {
@@ -294,40 +307,73 @@ app.use(auth);
 
 // Book route
 app.get('/book', (req, res) => {
-  if (book && reviews) {
-    res.render('pages/book', { book, reviews});
+  if (book && reviews && username) {
+    res.render('pages/book', { book, reviews, username}); 
   } else {
-    res.redirect('pages/home');
+    res.redirect('pages/home'); // redirects invalid path to home
   }
 });
 
+// fetch book details route
 app.get('/book/:id', async (req, res) => {
-  const book_google_vol = req.params.id;
+  const book_google_vol = `${req.params.id}`;
+  const username = req.session.user.username;
   try {
     const book = await db.oneOrNone('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
-    const reviews = await db.any('SELECT * FROM reviews LEFT JOIN reviews_to_books ON reviews.id = reviews_to_books.review_id LEFT JOIN reviews_to_profiles ON reviews.id = reviews_to_profiles.review_id LEFT JOIN profiles ON reviews_to_profiles.profile_id = profiles.id WHERE book_id = $1;', [book.id]);
-    res.render('pages/book', { book, reviews});
+    var reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = reviews_to_books.review_id WHERE book_id = $1;', [book.id]);
+    //console.log(book);
+    //console.log(reviews);
+    res.render('pages/book', {book, reviews, username}); // render page with books details and reviews
   } catch (error) {
     console.log(error);
     res.status(500).send('Error fetching book details');
   }
 });
-// review route
-app.post('/book/:id/review', async (req, res) => {
-  const bookId = req.params.id;
-  const { google_vol, title, description, rating, visibility } = req.body;
+
+
+// new review submission path
+app.post('/addReview', async (req, res) => {
+  const {title, description, rating, visibility, google_volume} = req.body;
   const user = req.session.user;
   if (!user) {
-    res.status(401).send('Please log in to submit a review');
+    res.status(401).send('Please log in to submit a review'); // user auth
     return;
   }
 
+  // console.log(user);
+  // console.log(req.body);
+  // console.log(google_volume);
+  // console.log(title);
+
   try {
-    await db.none('INSERT INTO reviews (google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5)', [google_vol, title, description, rating, visibility]);
-    res.redirect(`/book/${bookId}`);
+    // populate review data and fetch review and book id
+    var review_id = await db.one('INSERT INTO reviews (username, google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [user.username, google_volume, title, description, rating, visibility]);
+    var book_id = await db.one('SELECT id FROM books WHERE google_volume = $1;',[google_volume]);
+    
+    // link review, book, and profile in respective tables
+    await db.none('INSERT INTO reviews_to_books (review_id, book_id) VALUES ($1, $2);', [review_id.id, book_id.id]);
+    await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
+    
+    res.status(200);
+    
   } catch (error) {
     res.status(500).send('Error submitting review');
   }
+});
+
+// view all reviews for one book route
+app.get('/reviews/:id', async (req, res) => {
+  const book_google_vol = `${req.params.id}`;
+  const user = req.session.user;
+
+  if (!user) {
+    res.status(401).send('Please log in to view all reviews'); // user auth
+    return;
+  }
+
+  var reviews = await db.any('SELECT * FROM reviews WHERE google_volume = $1', [book_google_vol]);
+
+  res.render('pages/reviews', {user, reviews});
 });
 
 // Logout route
