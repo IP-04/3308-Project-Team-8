@@ -142,7 +142,7 @@ app.get('/discover', async (req, res) => {
     try {
       // Query for the most recent books, ordered by publish_date
       const newReleases = await db.any(
-        'SELECT id, title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6'
+        'SELECT id, title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6;'
       );
   
       res.render('pages/discover', {

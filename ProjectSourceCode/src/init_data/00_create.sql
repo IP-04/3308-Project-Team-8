@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS books (
 	description VARCHAR(5000),
 	sample VARCHAR(5000),
 	purchase_link VARCHAR(200),
-	google_volume VARCHAR(12) NOT NULL UNIQUE
+	google_volume VARCHAR(12) NOT NULL UNIQUE,
 	publish_date DATE 			/*Added a publish date*/
 );
 
