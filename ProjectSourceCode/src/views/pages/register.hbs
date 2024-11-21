@@ -21,7 +21,7 @@
 
             const formData = new FormData(registerForm);
             const data = Object.fromEntries(formData.entries());
-           /refer to route in index.js, take result from there
+            //refer to route in index.js, take result from there
             try {
                 const response = await fetch('/register', {
                     method: 'POST',
