@@ -127,7 +127,7 @@ function updateReviewsFromModal() {
     updateDOM();
     REVIEW_MODAL.hide();
     
-    fetch('http://localhost:3000/addReview', {
+    fetch('/addReview', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
