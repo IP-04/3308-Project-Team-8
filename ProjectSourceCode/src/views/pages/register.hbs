@@ -1,12 +1,49 @@
-
-<form action = "/register" method="POST">
-	<h1 style="font-size:200%">Register</h1>
-	<label for="username">Username</label><br>	
-	<input id="username" name="username" type="text" pattern=".+"></input><br>
-	<label for="password">Password</label><br>     
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+<form action = "/register" method="POST" id="registerForm">
+        <h1 style="font-size:200%">Register</h1>
+        <div id="usernameError" class="error-message" style="color: red"></div>
+        <label for="username">Username</label><br>
+        <input id="username" name="username" type="text" pattern=".+"></input><br>
+        <label for="password">Password</label><br>
         <input id="password" name="password" type="password"></input><br>
-	<input type ="checkbox" onclick="togglePasswordVisibility()">Show Password<br>
-	<button type="submit" class="btn btn-primary">Register</button>
-	<p>Already Have an account?<a href="/login">Login</a></p>
+        <input type ="checkbox" onclick="togglePasswordVisibility()">Show Password<br>
+        <button type="submit" class="btn btn-primary">Register</button>
+        <p>Already Have an account?<a href="/login">Login</a></p>
 </form>
+<script>
+        const registerForm = document.getElementById('registerForm');
+        const usernameError = document.getElementById('usernameError');
+        const formError = document.getElementById('formError');
 
+        registerForm.addEventListener('submit', async (event) => {
+            //prevent form from submitting automatically until we can do what we want
+            event.preventDefault();
+
+            const formData = new FormData(registerForm);
+            const data = Object.fromEntries(formData.entries());
+           /refer to route in index.js, take result from there
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    if (errorData.error === 'Username already taken') {
+                        usernameError.textContent = errorData.error;
+                    } else {
+                        formError.textContent = errorData.error || 'An error occurred.';
+                    }
+                } else {
+                    // Registration successful, redirect to home page
+                    window.location.href = '/home';
+                }
+                //if the username is already taken, fill in the error form with that information
+            } catch (error) {
+                usernameError.textContent = 'That Username is already taken';
+            }
+        });
+</script>
+</body>

@@ -1,0 +1,15 @@
+<main class="ms-3">
+    <script>console.log('{{reviews}}');</script>
+    <ul style="width: 50rem;">
+        {{#each reviews}}
+            {{#if this.visibility}}
+                <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
+                    <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.title}}</strong>
+                    <a href = '/user/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                    <div class="h7 text-start position-relative py-1">{{this.description}}</div>
+                </li>
+            {{/if}}
+        {{/each}}
+    </ul>
+    <button onclick="history.back()" class="btn col-2 btn-primary">Back to Book Page</button>
+</main>
