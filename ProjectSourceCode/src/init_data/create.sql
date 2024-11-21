@@ -21,7 +21,25 @@ CREATE TABLE IF NOT EXISTS books (
 	sample VARCHAR(5000),
 	purchase_link VARCHAR(200),
 	google_volume VARCHAR(12) NOT NULL UNIQUE
+	publish_date DATE 			/*Added a publish date*/
 );
+
+/*some books only show the year or the year and month and for those weve made a default 01-01 addition to the column
+this is used in the index.js function when parsin in the published date*/
+CREATE OR REPLACE FUNCTION convert_partial_date(text)
+RETURNS DATE AS $$
+BEGIN
+    IF $1 ~ '^\d{4}$' THEN
+        RETURN ($1 || '-01-01')::DATE;
+    ELSIF $1 ~ '^\d{4}-\d{2}$' THEN
+        RETURN ($1 || '-01')::DATE;		
+    ELSE
+        RETURN $1::DATE;
+    END IF;
+EXCEPTION WHEN OTHERS THEN
+    RAISE EXCEPTION 'Invalid date format. Use YYYY or YYYY-MM-DD';
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE TABLE IF NOT EXISTS reviews (
 	id SERIAL PRIMARY KEY,

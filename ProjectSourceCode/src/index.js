@@ -127,24 +127,33 @@ app.get('/home', async (req, res) => {
 });
 
 // Discover route
-app.get('/discover', (req, res) => {
+app.get('/discover', async (req, res) => {
   const user = req.session.user;
-  //const username = user ? user.username : 'Guest';
+  const username = user ? user.username : 'Guest';// we dont have guest, right ?   
   if (user) {
-    username = user.username;
-    res.render('pages/discover', {
-      username,
-      recommendedBooks: [], // Example data (MUST REPLACE)
-      newReleases: [],
-      trendingBooks: [],
-      wishlist: []
-    });
+    try {
+      // Query for the most recent books, ordered by publish_date
+      const newReleases = await db.any(
+        'SELECT id, title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6'
+      );
+  
+      res.render('pages/discover', {
+        user: user,
+        username: username,
+        newReleases: newReleases, 
+      });
+    } catch (error) {
+      // Handle errors during the database query
+      console.log(error);
+      res.status(500).send('Error fetching new releases');
+    }
   } else {
     res.status(302);
     res.redirect('/login');
-  }
-  
+  }  
+
 });
+
 
 // Profile route
 app.get('/profile', (req, res) => {
@@ -223,11 +232,13 @@ app.post('/login', async (req, res) => {
               var sample = books[i].volumeInfo.previewLink;
               var purchase = books[i].volumeInfo.infoLink;
               var google_vol = books[i].id;
+              var publish_date = books[i].volumeInfo.publishedDate;
+
 
               //console.log(google_vol);
 
               // NO AVG RATING INSERTION (intentional)
-              var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`;
+              var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, convert_partial_date($8)) RETURNING *;`;
               db.any(query, [
                 title,
                 author,
@@ -236,6 +247,7 @@ app.post('/login', async (req, res) => {
                 sample,
                 purchase,
                 google_vol,
+                publish_date
               ])
               /*.then(results => {
                 console.log(results);
