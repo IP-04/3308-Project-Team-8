@@ -198,3 +198,54 @@ function togglePasswordVisibility(){
 		x.type = "password";
 	}
 }
+
+// Function to initialize rating submission
+function initializeRatingForms() {
+    const ratingForms = document.querySelectorAll('.rating-form');
+
+    ratingForms.forEach(form => {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            const bookId = formData.get('book_id');
+            const rating = formData.get('rating');
+
+            // Send the rating to the server
+            fetch('/rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    book_id: bookId,
+                    rating: parseFloat(rating),
+                }),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to submit rating');
+                    }
+                })
+                .then(data => {
+                    alert(`Rating submitted! New average rating: ${data.avgRating}`)
+                    const avgRatingElement = document.querySelector(`#avg-rating-${bookId}`);
+                    if (avgRatingElement) {
+                        avgRatingElement.textContent = `Average Rating: ${data.avgRating}/5`;
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Error submitting rating');
+                });
+        });
+    });
+}
+
+// Call this function to initialize the rating forms once the DOM is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    initializeRatingForms();
+});
