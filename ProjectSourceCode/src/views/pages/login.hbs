@@ -1,11 +1,49 @@
-<form action = "/login" method="POST">
-	<h1 style="font-size:200%">Login</h1>
-	<label for="username">Username</label><br>	
-	<input id="username" name="username" type="text" pattern=".+"></input><br>
-	<label for="password">Password</label><br>                                                                                      
-	 <input id="password" name="password" type="password"></input><br>
-	<input type="checkbox" onclick="togglePasswordVisibility()">Show Password<br>
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+<form action = "/login" id="loginForm" method="POST">
+        <h1 style="font-size:200%">Login</h1>
+        <div>
+                <div id="usernameError" class="error-message" style="color: red"></div>
+                <label for="username">Username</label><br>
+                <input id="username" name="username" type="text" pattern=".+"></input>
+        </div>
+        <div>
+                <label for="password">Password</label><br>                                                                                                         <input id="password" name="password" type="password"></input><br>
+        </div>
+        <input type="checkbox" onclick="togglePasswordVisibility()">Show Password<br>
 	<button type="submit" class="btn btn-primary">Login</button>
-	<p>Don't have an account?<a href="/register">Register</a></p>
+        <p>Don't have an account?<a href="/register">Register</a></p>
 </form>
+<script>
+        //javascript for error message
+        const loginForm = document.getElementById('loginForm');
+        const formError = document.getElementById('usernameError');
 
+        loginForm.addEventListener('submit', async (event) => {
+            //prevents form from calling /login  until we want it to
+            event.preventDefault();
+
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                //call /login POST method and choose based on response
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    formError.textContent = errorData.error || 'An error occurred.';
+                } else {
+                    // Redirect on  successful login
+                    window.location.href = '/home';
+                }
+                //If the username or password was entered incorrectly, put text in username Error div
+            } catch (error) {
+                formError.textContent = 'Invalid Username or Password';
+            }
+        });
+</script>
+</body>
