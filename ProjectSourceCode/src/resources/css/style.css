@@ -75,6 +75,11 @@ nav {
     height: 100vh; /* Full height */
 }
 
+.friend-card {
+    width: 100%;
+    padding: 5px 5px;
+}
+
 .book-card {
     width: 18rem;
     padding: 5px 5px;

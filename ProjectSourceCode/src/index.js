@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server
+  host: 'db', // the database server
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -68,6 +68,7 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const Handlebars = require('handlebars');
+const { profile } = require('console');
 
 // Register a custom helper to serialize data to JSON
 Handlebars.registerHelper('json', function(context) {
@@ -163,28 +164,44 @@ app.get('/discover', async (req, res) => {
 });
 
 
-// Profile route
-app.get('/profile', (req, res) => {
+// Profile route (w/ determine user page)
+let USER_PROFILE = null;
+app.get('/profile', async (req, res) => {
   if (!req.session.user) return res.redirect('/login');  // Redirect to login if the user is not authenticated
 
-  const user = req.session.user;
-  const username = user.username || 'Guest';
-  const description = user.description || 'No description available.'; // Provide fallback if description is missing
+  const logged_in_user = req.session.user;  
+  let profile;
+  if (USER_PROFILE) {
+    profile = USER_PROFILE;
+  } else {
+    profile = await db.one('SELECT * FROM profiles WHERE username = $1;',[logged_in_user.username]);
+  }
+  const username = profile.username;
+  var description = profile.description;
+  const reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.book_id = books.id WHERE username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY rating DESC LIMIT 15;', [username]);
+  const friends = await db.any('SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 10;',[profile.id]);
+  const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
 
+  if (description == 'Add a Description of Yourself!') {description = 'This user is too reclusive to add a description!'}
+  //console.log({username, description, reviews, friends, liked_books});
+  
+  USER_PROFILE = null;
   // Modified profile data for testing
   res.render('pages/profile', {
     username,
     description,
-    reviews: [
-      { title: 'Amazing Book!', date: '2024-10-01', reviewText: 'Loved it!' },
-      { title: 'Could be better', date: '2024-09-15', reviewText: 'It was okay.' },
-    ],
-    genres: ['Fiction', 'Science Fiction', 'Fantasy'],
-    friends: [
-      { name: 'Alice', activity: 'Read "The Great Gatsby"', timeAgo: '2 hours ago' },
-      { name: 'Bob', activity: 'Added "1984" to wishlist', timeAgo: '5 hours ago' },
-    ],
+    liked_books,
+    reviews,
+    friends
   });
+});
+
+//profile route (otheruser)
+app.get('/profile/:username', async (req, res) => {
+  const username = req.params.username;
+  const profile = await db.one('SELECT * FROM profiles WHERE username = $1', [username]);
+  USER_PROFILE = profile;
+  res.redirect('/profile');
 });
 
 // Login route
@@ -239,7 +256,7 @@ app.post('/login', async (req, res) => {
               if(books[i].volumeInfo.imageLinks) {var thumbnail = books[i].volumeInfo.imageLinks.thumbnail;}
               var desc = books[i].volumeInfo.description;
               var sample = books[i].volumeInfo.previewLink;
-              var purchase = books[i].volumeInfo.infoLink;
+              var purchase = books[i].saleInfo.buyLink;
               var google_vol = books[i].id;
               var publish_date = books[i].volumeInfo.publishedDate;
 
@@ -359,13 +376,13 @@ app.post('/addReview', async (req, res) => {
 
   try {
     // populate review data and fetch review and book id
-    var review_id = await db.one('INSERT INTO reviews (username, google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [user.username, google_volume, title, description, rating, visibility]);
+    var review_id = await db.one('INSERT INTO reviews (username, google_volume, rev_title, rev_description, rating, visibility) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [user.username, google_volume, title, description, rating, visibility]);
     var book_id = await db.one('SELECT id FROM books WHERE google_volume = $1;',[google_volume]);
     
     // link review, book, and profile in respective tables
     await db.none('INSERT INTO reviews_to_books (review_id, book_id) VALUES ($1, $2);', [review_id.id, book_id.id]);
     await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
-    
+    await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $2) WHERE id = $1;', [book_id.id, google_volume])
     res.status(200);
     
   } catch (error) {

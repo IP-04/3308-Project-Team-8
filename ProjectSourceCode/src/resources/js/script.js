@@ -49,7 +49,8 @@ function createReviewUser(username) {
     const user_link = document.createElement('a');
     user_link.className = 'h8 text-start position-relative py-0';
     user_link.innerHTML = 'Reviewed by: ' + username;
-    user_link.href = `/user/${{username}}`;
+    console.log(username);
+    user_link.href = '/profile/'+ username;
     user_link.style = 'text-decoration: none; color: #d19c1d;';
     return user_link;
 }

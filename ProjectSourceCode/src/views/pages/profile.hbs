@@ -1,20 +1,62 @@
 
-    <main class="container">
+    <main class="container flex-grow px-0">
         <div class="profile-header bg-shade">
-            <h1 class="text-light">{{user.username}}'s Profile</h1>
-            <p class="text-light">Welcome to your profile page!</p>
+            <h1 class="text-light ms-3 py-2">{{username}}'s Profile</h1>
         </div>
 
-        <div class="profile-content">
+        <div class="profile-content ms-3">
+            <section class="row" id="top-content">
+                <section class="col-8" id="profile-books">
+                    <section class="row" id="liked-books">
+                        <h4>Liked Books</h4>
+                        {{#each liked_books}}
+                            <li class="col-3 d-flex justify-content-center">
+                                <div class=" card book-card bg-1 h-100">
+                                    <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
+                                    <div class="card-body book-info bg-light rounded-bottom">
+                                        <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </li>
+                        {{/each}}
+                    </section>
+                    <!--<section class="row" id="recently-read">
+                        FUTURE FEATURE IMPLEMENTATION
+                    </section>-->
+                    <hr>
+                    <section class="row" id="description">
+                        <h4> About {{username}}</h4>
+                        <div>
+                            <p>{{description}}</p>
+                        </div>
+                    </section>
+                </section>
+                <section class="col-3" id="friends-list">
+                    <h4 class="text-center">{{username}}'s Friends</h4>
+                        {{#each friends}}
+                            <li class="d-flex text-center">
+                                <div class="card friend-card bg-1 h-100">
+                                    <a class="h6" href="/profile/{{this.username}}">{{this.username}}</a>
+                                </div>
+                            </li>
+                        {{/each}}
+                </section>
+                <hr>
+            </section>
+
             <section class="reviews">
                 <h2 class="text-primary">User Reviews</h2>
-                {{#if reviews.length}}
+                {{#if reviews}}
                     <ul>
                         {{#each reviews}}
-                            <li>
-                                <strong>{{this.title}}</strong> - {{this.date}}
-                                <p>{{this.reviewText}}</p>
-                            </li>
+                            {{#if this.visibility}}
+                                <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
+                                    <h6>For Book: {{reviews.title}}</h6>
+                                    <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
+                                    <a href = '/user/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                    <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
+                                </li>
+                            {{/if}}
                         {{/each}}
                     </ul>
                 {{else}}
@@ -22,33 +64,11 @@
                 {{/if}}
             </section>
 
-            <section class="genres">
-                <h2 class="text-primary">Favorite Genres</h2>
-                {{#if genres.length}}
-                    <ul>
-                        {{#each genres}}
-                            <li class="bg-dark text-light">{{this}}</li>
-                        {{/each}}
-                    </ul>
-                {{else}}
-                    <p class="text-shade">No favorite genres listed yet!</p>
-                {{/if}}
-            </section>
+            <section></section><br>
+            <section></section><br>
+            <section></section><br>
+            <section></section>
 
-            <section class="friends">
-                <h2 class="text-primary">Friend Activity</h2>
-                {{#if friends.length}}
-                    <ul>
-                        {{#each friends}}
-                            <li>
-                                <strong>{{this.name}}</strong> - {{this.activity}} <span class="text-secondary">({{this.timeAgo}})</span>
-                            </li>
-                        {{/each}}
-                    </ul>
-                {{else}}
-                    <p class="text-shade">No friend activity available!</p>
-                {{/if}}
-            </section>
         </div>
     </main>
 
