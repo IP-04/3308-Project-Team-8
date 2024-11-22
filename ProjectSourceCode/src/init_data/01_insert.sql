@@ -7,4 +7,4 @@ INSERT INTO profiles
     (username, description)
 
 VALUES
-    ('abc', 'Example Desc')
+    ('abc', 'Add a Description of Yourself!')

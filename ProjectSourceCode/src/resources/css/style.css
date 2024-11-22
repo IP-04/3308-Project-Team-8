@@ -121,6 +121,14 @@ nav {
     --bs-btn-hover-border-color: #d98324;
 }
 
+.btn-secondary {
+    --bs-btn-bg: #f1f7ed;
+    --bs-btn-color: #363020;
+    --bs-btn-border-color: #d19c1d;
+    --bs-btn-hover-bg: #d98324;
+    --bs-btn-hover-border-color: #d98324;
+}
+
 .bg-1 {
     background-color: #d19c1d;
     color: #363020;
