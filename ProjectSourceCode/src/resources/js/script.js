@@ -187,6 +187,36 @@ function updateDOM() {
     }
 }
 
+let PROFILE_MODAL;
+function openProfileModal() {
+    PROFILE_MODAL = new bootstrap.Modal(document.getElementById('profile-modal'));
+    PROFILE_MODAL.show();
+}
+function closeProfileModal() { // when cancel button is clicked
+    PROFILE_MODAL.hide();
+}
+function updateProfileFromModal() {
+    const new_desc = document.getElementById('profile-desc').value;
+
+    const desc_element = document.getElementById('html-desc-div');
+    const html_desc = document.getElementById('html-desc');
+    if (html_desc != null) {html_desc.remove();}
+
+    var new_desc_element = document.createElement('p');
+    new_desc_element.innerHTML = new_desc;
+    new_desc_element.id = 'html-desc';
+
+    desc_element.appendChild(new_desc_element);
+
+    fetch('/editDesc', {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({description: new_desc})
+    });
+    closeProfileModal();
+}
 
 //function to change visibility of the password on click
 function togglePasswordVisibility(){

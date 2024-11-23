@@ -4,6 +4,35 @@
             <h1 class="text-light ms-3 py-2">{{username}}'s Profile</h1>
         </div>
 
+        <!-- Modal elements -->
+        <div class="modal" tabindex="-1" id="profile-modal">
+            <div class="modal-dialog">
+            <div class="modal-content bg-1">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User Description</h5>
+                </div>
+                <div class="modal-body bg-2"></div>
+                    <form id="review-form" onsubmit="updateProfileFromModal(); return false;">
+                        <!-- Include form fields to gather the information listed below. -->
+                        <div class="row mb-3">
+                            <label class="form-label col-sm-3 ms-3"><strong>Description</strong></label><br>
+                            <textarea class="col-sm-8 h-40" type="text" id="profile-desc" name="description" pattern=".{1,250}" style="height: 100px">{{description}}</textarea>
+                        </div>
+                        
+                        <button id="close_button" class="btn btn-secondary ms-3" type="button" onclick="closeReviewModal();">
+                        Cancel
+                        </button>
+                        <button id="submit_button" class="btn btn-primary" type="submit">
+                        Save
+                        </button>
+                    </form>      
+                <div class="modal-footer bg-2"></div>
+            </div>
+            </div>
+        </div>
+
+
+
         <div class="profile-content ms-3">
             <section class="row" id="top-content">
                 <section class="col-8" id="profile-books">
@@ -13,8 +42,8 @@
                         {{else}}
                         <h4> About {{username}} </h4>
                         {{/if}}
-                        <div>
-                            <p>{{description}}</p>
+                        <div id="html-desc-div">
+                            <p id="html-desc">{{description}}</p>
                         </div>
                     </section>
                     <hr>

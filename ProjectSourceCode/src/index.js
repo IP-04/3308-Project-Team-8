@@ -207,11 +207,20 @@ app.get('/profile', async (req, res) => {
 
 //profile route (otheruser)
 app.get('/profile/:username', async (req, res) => {
+  const logged_in_user = req.session.user;
   const username = req.params.username;
   const profile = await db.one('SELECT * FROM profiles WHERE username = $1', [username]);
-  if (profile.description == 'Add a Description of Yourself!') {profile.description = 'This user is too reclusive to add a description!'}
+  if (profile.description == 'Add a Description of Yourself!' && username != logged_in_user.username) {profile.description = 'This user is too reclusive to add a description!'}
   USER_PROFILE = profile;
   res.redirect('/profile');
+});
+
+// edit profile description
+app.put('/editDesc', async (req, res) => {
+  const description = req.body.description;
+  const user = req.session.user;
+  await db.none('UPDATE profiles SET description = $1 WHERE profiles.username = $2', [description, user.username]);
+  res.redirect(303, '/profile');
 });
 
 // Login route
