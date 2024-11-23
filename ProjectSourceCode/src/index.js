@@ -143,7 +143,7 @@ app.get('/discover', async (req, res) => {
     try {
       // Query for the most recent books, ordered by publish_date
       const newReleases = await db.any(
-        'SELECT id, title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6;'
+        'SELECT id, book_title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6;'
       );
   
       res.render('pages/discover', {
@@ -182,8 +182,13 @@ app.get('/profile', async (req, res) => {
   const friends = await db.any('SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 10;',[profile.id]);
   const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
   const recently_read = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY reviews.id DESC LIMIT 4;', [username])
+  const is_my_profile = (username == logged_in_user.username);
+  var is_friend = false;
+  friends.forEach(friend => {
+    if (friend.username == logged_in_user.username) {is_friend = true;} else {is_friend = is_my_profile;}
+  });
 
-  if (description == 'Add a Description of Yourself!') {description = 'This user is too reclusive to add a description!'}
+
   //console.log({username, description, reviews, friends, liked_books});
   
   USER_PROFILE = null;
@@ -194,7 +199,9 @@ app.get('/profile', async (req, res) => {
     liked_books,
     recently_read,
     reviews,
-    friends
+    friends,
+    is_my_profile,
+    is_friend
   });
 });
 
@@ -202,6 +209,7 @@ app.get('/profile', async (req, res) => {
 app.get('/profile/:username', async (req, res) => {
   const username = req.params.username;
   const profile = await db.one('SELECT * FROM profiles WHERE username = $1', [username]);
+  if (profile.description == 'Add a Description of Yourself!') {profile.description = 'This user is too reclusive to add a description!'}
   USER_PROFILE = profile;
   res.redirect('/profile');
 });
@@ -266,7 +274,7 @@ app.post('/login', async (req, res) => {
               //console.log(google_vol);
 
               // NO AVG RATING INSERTION (intentional)
-              var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, convert_partial_date($8)) RETURNING *;`;
+              var query = `INSERT INTO books (book_title, author, thumbnail_link, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, convert_partial_date($8)) RETURNING *;`;
               db.any(query, [
                 title,
                 author,
