@@ -93,6 +93,10 @@ app.get('/home', async (req, res) => {
   var username = "Guest";
   if (user) {username = user.username;}
 
+
+  const top_reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.book_id = books.id WHERE rating > 3.0 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY rating DESC LIMIT 15;');
+
+
   let is_populated = false; // is books database already populated
   const is_populated_query = `SELECT google_volume FROM books WHERE id = 1;`;
   await db.oneOrNone(is_populated_query)
@@ -130,6 +134,7 @@ app.get('/home', async (req, res) => {
       res.render('pages/home',{ // render home page while passing data
           user: user,
           username: username,
+          reviews: top_reviews,
           books: google_books,
           randomBooks: randomBooks,
           featuredBooks: featuredBooks,
@@ -173,18 +178,14 @@ app.get('/home', async (req, res) => {
         var randomOffset = Math.floor(Math.random() * 34);
         var randomBooks = google_books.slice(randomOffset, randomOffset + 6);
 
-        var featuredBooks;
-        if (user) {
-          // temporary || make based off friends and preferencecs if user logged in
-        } else {
-          featuredBooks = google_books.slice(1,7); // this determines what books are displayed
-        }
+        const featuredBooks = google_books.slice(1,7); // this determines what books are displayed
         const trendingBooks = google_books.slice(7,13);
         
         // render home page
         res.render('pages/home',{ // render home page while passing data
             user: user,
             username: username,
+            reviews: top_reviews,
             books: google_books,
             randomBooks: randomBooks,
             featuredBooks: featuredBooks,

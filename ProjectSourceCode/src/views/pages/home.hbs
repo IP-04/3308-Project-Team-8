@@ -71,16 +71,19 @@
             {{/if}}
         </section>
 
-        <section class="top-reviews">
+        <section class="top-reviews container-fluid">
             <h2>Top-Rated Reviews</h2>
-            {{#if topReviews.length}}
+            {{#if reviews}}
                 <ul>
-                    {{#each topReviews}}
-                        <li>
-                            <h3>{{this.bookTitle}}</h3>
-                            <p><strong>{{this.user}}:</strong> {{this.reviewText}}</p>
-                            <p>Rating: {{this.rating}}/5</p>
-                        </li>
+                    {{#each reviews}}
+                        {{#if this.visibility}}
+                            <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
+                                <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
+                                <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
+                                <a href = '/user/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
+                            </li>
+                        {{/if}}
                     {{/each}}
                 </ul>
             {{else}}
