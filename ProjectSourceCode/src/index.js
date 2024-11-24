@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server
+  host: 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -68,6 +68,7 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const Handlebars = require('handlebars');
+const { profile } = require('console');
 
 // Register a custom helper to serialize data to JSON
 Handlebars.registerHelper('json', function(context) {
@@ -142,7 +143,7 @@ app.get('/discover', async (req, res) => {
     try {
       // Query for the most recent books, ordered by publish_date
       const newReleases = await db.any(
-        'SELECT id, title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6;'
+        'SELECT id, book_title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6;'
       );
   
       res.render('pages/discover', {
@@ -163,28 +164,88 @@ app.get('/discover', async (req, res) => {
 });
 
 
-// Profile route
-app.get('/profile', (req, res) => {
+// Profile route (w/ determine user page)
+let USER_PROFILE = null;
+app.get('/profile', async (req, res) => {
   if (!req.session.user) return res.redirect('/login');  // Redirect to login if the user is not authenticated
 
-  const user = req.session.user;
-  const username = user.username || 'Guest';
-  const description = user.description || 'No description available.'; // Provide fallback if description is missing
+  const logged_in_user = req.session.user;  // differentiate between logged in user and profile user (in case of viewing other profile)
+  let profile;
+  if (USER_PROFILE) { // this constant variable sets user to someone else if calling their profile page
+    profile = USER_PROFILE;
+  } else {
+    profile = await db.one('SELECT * FROM profiles WHERE username = $1;',[logged_in_user.username]);
+  }
+  // generate data to pass to render 
+  const username = profile.username;
+  var description = profile.description;
+  const profile_id = profile.id;
+  const user_id = logged_in_user.id;
+  const reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.book_id = books.id WHERE username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY rating DESC LIMIT 15;', [username]);
+  const friends = await db.any('SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 10;',[profile.id]);
+  const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
+  const recently_read = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY reviews.id DESC LIMIT 4;', [username])
+  const is_my_profile = (username == logged_in_user.username);
+  var is_friend = false;
+  friends.forEach(friend => { // determines is the logged in user is on the profile's friend list
+    if (friend.username == logged_in_user.username) {is_friend = true;} else {is_friend = is_my_profile;}
+  });
 
+
+  //console.log({username, description, reviews, friends, liked_books});
+  
+  USER_PROFILE = null;
   // Modified profile data for testing
   res.render('pages/profile', {
+    profile_id,
+    user_id,
     username,
+    logged_in_username: logged_in_user.username,
     description,
-    reviews: [
-      { title: 'Amazing Book!', date: '2024-10-01', reviewText: 'Loved it!' },
-      { title: 'Could be better', date: '2024-09-15', reviewText: 'It was okay.' },
-    ],
-    genres: ['Fiction', 'Science Fiction', 'Fantasy'],
-    friends: [
-      { name: 'Alice', activity: 'Read "The Great Gatsby"', timeAgo: '2 hours ago' },
-      { name: 'Bob', activity: 'Added "1984" to wishlist', timeAgo: '5 hours ago' },
-    ],
+    liked_books,
+    recently_read,
+    reviews,
+    friends,
+    is_my_profile,
+    is_friend
   });
+});
+
+//profile route (otheruser)
+app.get('/profile/:username', async (req, res) => {
+  const logged_in_user = req.session.user;
+  const username = req.params.username;
+  const profile = await db.one('SELECT * FROM profiles WHERE username = $1', [username]); // retrieve relant profile info from database
+  // update default description if viewing a different user's profile
+  if (profile.description == 'Add a Description of Yourself!' && username != logged_in_user.username) {profile.description = 'This user is too reclusive to add a description!'}
+  USER_PROFILE = profile;
+  res.redirect('/profile'); // call regular profile path with updated info
+});
+
+// edit profile description
+app.put('/editDesc', async (req, res) => { // when a user edits their profile description, update database
+  const description = req.body.description;
+  const user = req.session.user;
+  await db.none('UPDATE profiles SET description = $1 WHERE profiles.username = $2', [description, user.username]);
+  res.redirect(303, '/profile'); // 303 here allows a redirect from PUT to GET
+});
+
+// add friend route
+app.post('/addFriend', async (req, res) => { // add friend to database
+  const user_id = req.body.user_id;
+  const friend_id = req.body.profile_id;
+  await db.none('INSERT INTO friends (user_id, friend_id) VALUES ($1, $2),($2, $1);',[user_id, friend_id]);
+  res.status(200);
+});
+
+// remove friend route
+app.post('/removeFriend', async (req, res) => { // remove friend from database
+  const user_id = req.body.user_id;
+  const friend_id = req.body.profile_id;
+  const query = 'DELETE FROM friends WHERE user_id = $1 AND friend_id = $2;';
+  await db.none(query,[user_id, friend_id]);
+  await db.none(query,[friend_id, user_id]); // deletes both instances from the friends table
+  res.status(200);
 });
 
 // Login route
@@ -239,7 +300,7 @@ app.post('/login', async (req, res) => {
               if(books[i].volumeInfo.imageLinks) {var thumbnail = books[i].volumeInfo.imageLinks.thumbnail;}
               var desc = books[i].volumeInfo.description;
               var sample = books[i].volumeInfo.previewLink;
-              var purchase = books[i].volumeInfo.infoLink;
+              var purchase = books[i].saleInfo.buyLink;
               var google_vol = books[i].id;
               var publish_date = books[i].volumeInfo.publishedDate;
 
@@ -247,7 +308,7 @@ app.post('/login', async (req, res) => {
               //console.log(google_vol);
 
               // NO AVG RATING INSERTION (intentional)
-              var query = `INSERT INTO books (title, author, thumbnail_link, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, convert_partial_date($8)) RETURNING *;`;
+              var query = `INSERT INTO books (book_title, author, thumbnail_link, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, convert_partial_date($8)) RETURNING *;`;
               db.any(query, [
                 title,
                 author,
@@ -328,13 +389,13 @@ app.get('/book', (req, res) => {
 
 // fetch book details route
 app.get('/book/:id', async (req, res) => {
+  console.log(req.params);
   const book_google_vol = `${req.params.id}`;
   const username = req.session.user.username;
   try {
     const book = await db.oneOrNone('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
     var reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = reviews_to_books.review_id WHERE book_id = $1;', [book.id]);
-    //console.log(book);
-    //console.log(reviews);
+   
     res.render('pages/book', {book, reviews, username}); // render page with books details and reviews
   } catch (error) {
     console.log(error);
@@ -352,20 +413,15 @@ app.post('/addReview', async (req, res) => {
     return;
   }
 
-  // console.log(user);
-  // console.log(req.body);
-  // console.log(google_volume);
-  // console.log(title);
-
   try {
     // populate review data and fetch review and book id
-    var review_id = await db.one('INSERT INTO reviews (username, google_volume, title, description, rating, visibility) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [user.username, google_volume, title, description, rating, visibility]);
+    var review_id = await db.one('INSERT INTO reviews (username, google_volume, rev_title, rev_description, rating, visibility) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [user.username, google_volume, title, description, rating, visibility]);
     var book_id = await db.one('SELECT id FROM books WHERE google_volume = $1;',[google_volume]);
     
     // link review, book, and profile in respective tables
     await db.none('INSERT INTO reviews_to_books (review_id, book_id) VALUES ($1, $2);', [review_id.id, book_id.id]);
     await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
-    
+    await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $2) WHERE id = $1;', [book_id.id, google_volume])
     res.status(200);
     
   } catch (error) {
@@ -385,7 +441,7 @@ app.get('/reviews/:id', async (req, res) => {
 
   var reviews = await db.any('SELECT * FROM reviews WHERE google_volume = $1', [book_google_vol]);
 
-  res.render('pages/reviews', {user, reviews});
+  res.render('pages/reviews', {user, reviews}); 
 });
 
 // Logout route

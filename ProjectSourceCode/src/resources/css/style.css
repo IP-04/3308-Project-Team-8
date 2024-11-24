@@ -75,6 +75,11 @@ nav {
     height: 100vh; /* Full height */
 }
 
+.friend-card {
+    width: 100%;
+    padding: 5px 5px;
+}
+
 .book-card {
     width: 18rem;
     padding: 5px 5px;
@@ -110,6 +115,14 @@ nav {
 
 .btn-primary {
     --bs-btn-bg: #d19c1d;
+    --bs-btn-color: #363020;
+    --bs-btn-border-color: #d19c1d;
+    --bs-btn-hover-bg: #d98324;
+    --bs-btn-hover-border-color: #d98324;
+}
+
+.btn-secondary {
+    --bs-btn-bg: #f1f7ed;
     --bs-btn-color: #363020;
     --bs-btn-border-color: #d19c1d;
     --bs-btn-hover-bg: #d98324;
