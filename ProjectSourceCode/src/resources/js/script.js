@@ -41,7 +41,12 @@ function createBootstrapCard(id) {
 function createReviewTitle(text, rating) {
     const title = document.createElement('div');
     title.className = 'h6 text-start position-relative py-0';
-    title.innerHTML = rating + '/5.0 - ' + text;
+    if (rating == null) {
+        title.innerHTML = text;
+        title.id = 'empty-reviews';
+    } else {
+        title.innerHTML = rating + '/5.0 - ' + text;
+    }
     return title;
 }
 // Review data populating rating and username
@@ -79,6 +84,113 @@ function initializeReviews(reviews) {
     MAX_REVIEWS = max_reviews;
 
     updateDOM();
+}
+
+function initializeReviewModal() {
+    // Create a modal using JS. The id will be `review-modal`:
+    // Reference: https://getbootstrap.com/docs/5.3/components/modal/#via-javascript
+    REVIEW_MODAL = new bootstrap.Modal(document.getElementById('review-modal'));
+}
+function openReviewModal() { // when form is opened to leave a review
+    REVIEW_FORM = document.getElementById('review-form');
+    //REVIEW_FORM.setAttribute("onsubmit", `javascript:updateReviewsFromModal()`);
+    REVIEW_MODAL.show();
+}
+function closeReviewModal() { // when cancel button is clicked
+    REVIEW_MODAL.hide();
+}
+
+// takes data from form to use in review display -- this is separate from database addition
+function updateReviewsFromModal() {
+
+    REVIEW_COUNT++;
+
+    let id = REVIEW_COUNT;
+    
+    let google_volume = document.getElementById('review_google_vol').value;
+    let title = document.getElementById('review_title').value;
+    let description = document.getElementById('review_desc').value;
+    let rating = document.getElementById('review_rating').value;
+    let visibility = document.getElementById('review_visibility').value;
+    let username = document.getElementById('review_username').value;
+    
+
+    NEW_REVIEW = [{
+        id: id,
+        username: username,
+        google_volume: google_volume,
+        rev_title: title,
+        rev_description: description,
+        rating: rating,
+        visibility: visibility,
+    }]
+    
+    REVIEWS[REVIEW_COUNT-1] = NEW_REVIEW;
+    console.log(REVIEW_COUNT);
+    console.log(REVIEWS);
+    //console.log(REVIEWS);
+    updateDOM();
+    REVIEW_MODAL.hide();
+    
+    fetch('/addReview', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: title,
+            description: description,
+            rating: rating,
+            visibility: visibility,
+            google_volume: google_volume
+        })
+    });
+}
+
+// update display of reviews
+function updateDOM() {
+    console.log(REVIEWS[0]);
+    const container = document.getElementById('review-list');
+    console.log(container);
+
+    if (MAX_REVIEWS < 6) {MAX_REVIEWS = REVIEW_COUNT}
+
+    if (REVIEWS[0] == undefined) {
+        var no_reviews = createReviewTitle('No reviews for this book yet. Be the first to review!', null);
+        container.appendChild(no_reviews);
+        return;
+    }
+    for (let i = 0; i < MAX_REVIEWS; i++) {
+        const empty_reviews = document.getElementById('empty-reviews');
+        if (empty_reviews) {empty_reviews.remove()}
+        console.log(REVIEWS[i]);
+        var current_review = REVIEWS[i];
+        if(NEW_REVIEW == current_review) {current_review = current_review[0]} // this removes a weird json parsing artifact from the data
+        console.log(current_review);
+
+        var review_card = document.getElementById('review_card_' + current_review.id);
+        console.log(review_card);
+        if (review_card != null) {
+            review_card.remove();
+        }
+
+        if(current_review.visibility) {
+            var card = createBootstrapCard(current_review.id);
+
+            container.appendChild(card);
+            
+            var card_title = createReviewTitle(current_review.rev_title, current_review.rating);
+            card.appendChild(card_title);
+
+            var card_user = createReviewUser(current_review.username);
+            card.appendChild(card_user);
+
+            var card_desc = createReviewDesc(current_review.rev_description);
+            card.appendChild(card_desc);
+
+            console.log(card);
+        }
+    }
 }
 
 function addFriend(user_id, profile_id, user_username) {
@@ -134,111 +246,6 @@ function removeFriend(user_id, profile_id, user_username) {
             profile_id: profile_id
         })
     });
-}
-
-function initializeReviewModal() {
-    // Create a modal using JS. The id will be `review-modal`:
-    // Reference: https://getbootstrap.com/docs/5.3/components/modal/#via-javascript
-    REVIEW_MODAL = new bootstrap.Modal(document.getElementById('review-modal'));
-}
-function openReviewModal() { // when form is opened to leave a review
-    REVIEW_FORM = document.getElementById('review-form');
-    //REVIEW_FORM.setAttribute("onsubmit", `javascript:updateReviewsFromModal()`);
-    REVIEW_MODAL.show();
-}
-function closeReviewModal() { // when cancel button is clicked
-    REVIEW_MODAL.hide();
-}
-
-// takes data from form to use in review display -- this is separate from database addition
-function updateReviewsFromModal() {
-
-    REVIEW_COUNT++;
-
-    let id = REVIEW_COUNT;
-    
-    let google_volume = document.getElementById('review_google_vol').value;
-    let title = document.getElementById('review_title').value;
-    let description = document.getElementById('review_desc').value;
-    let rating = document.getElementById('review_rating').value;
-    let visibility = document.getElementById('review_visibility').value;
-    let username = document.getElementById('review_username').value;
-    
-
-    NEW_REVIEW = [{
-        id: id,
-        username: username,
-        google_volume: google_volume,
-        title: title,
-        description: description,
-        rating: rating,
-        visibility: visibility,
-    }]
-    
-    REVIEWS[REVIEW_COUNT-1] = NEW_REVIEW;
-    console.log(REVIEW_COUNT);
-    console.log(REVIEWS);
-    //console.log(REVIEWS);
-    updateDOM();
-    REVIEW_MODAL.hide();
-    
-    fetch('/addReview', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            title: title,
-            description: description,
-            rating: rating,
-            visibility: visibility,
-            google_volume: google_volume
-        })
-    });
-}
-
-// update display of reviews
-function updateDOM() {
-    console.log(REVIEWS[0]);
-    const container = document.getElementById('review-list');
-    console.log(container);
-
-    if (MAX_REVIEWS < 6) {MAX_REVIEWS = REVIEW_COUNT}
-
-    if (REVIEWS[0] == undefined) {
-        var no_reviews = createReviewTitle('No reviews for this book yet. Be the first to review!');
-        container.appendChild(no_reviews);
-        return;
-    }
-    for (let i = 0; i < MAX_REVIEWS; i++) {
-        console.log(REVIEWS[i]);
-        var current_review = REVIEWS[i];
-        if(NEW_REVIEW == current_review) {current_review = current_review[0]} // this removes a weird json parsing artifact from the data
-        console.log(current_review);
-
-        var review_card = document.getElementById('review_card_' + current_review.id);
-        console.log(review_card);
-        if (review_card != null) {
-            review_card.remove();
-        }
-
-        if(current_review.visibility) {
-            var card = createBootstrapCard(current_review.id);
-
-            container.appendChild(card);
-            
-            var card_title = createReviewTitle(current_review.title, current_review.rating);
-            card.appendChild(card_title);
-
-            var card_user = createReviewUser(current_review.username);
-            card.appendChild(card_user);
-
-            var card_desc = createReviewDesc(current_review.description);
-            card.appendChild(card_desc);
-
-            console.log(card);
-        }
-    }
 }
 
 let PROFILE_MODAL;

@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
+  host: 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -93,46 +93,110 @@ app.get('/home', async (req, res) => {
   var username = "Guest";
   if (user) {username = user.username;}
 
+  let is_populated = false; // is books database already populated
+  const is_populated_query = `SELECT google_volume FROM books WHERE id = 1;`;
+  await db.oneOrNone(is_populated_query)
+    .then(results => {
+      if(results) {is_populated = true;}
+    });
   
-  // Call API to populate books display upon loading /home
-  axios({
-    url: `https://www.googleapis.com/books/v1/volumes`,
-    method: 'GET',
-    dataType: 'json',
-    headers: {
-      'Accept-Encoding': 'application/json',
-    },
-    params: {
-      key: process.env.API_KEY,
-      q: 'e',
-      maxResults: 40 // cannot exceed 40, limitation set by google
-    },
-  })
-    .then(results => { // process data from API
-      
-      const google_books = results.data.items;
+    if (is_populated) { // if db is populated
+      const google_books = await db.any('SELECT * FROM books;');
+
+      var randomOffset = Math.floor(Math.random() * 154);
+      var randomBooks = google_books.slice(randomOffset, randomOffset + 6);
+
+      var trendingBooks = await db.any('SELECT * FROM books ORDER BY avg_rating DESC;');
       var featuredBooks;
       if (user) {
-        // temporary || make based off friends and preferencecs if user logged in
+        book_google_vol = await db.any('SELECT google_volume FROM reviews WHERE username = (SELECT username FROM users INNER JOIN friends ON users.id = user_id WHERE friend_id = $1) ORDER BY rating DESC LIMIT 6;',[user.id]);
+        featuredBooks = await db.any('SELECT * FROM books WHERE google_volume = $1;',[book_google_vol]);
+        if (featuredBooks.length < 6) {
+          for (let i = 0; i < 6; i++) {
+            if (i >= featuredBooks.length) {
+              featuredBooks[i] = trendingBooks[i+6];
+            }
+          }
+        } else {
+          featuredBooks = await db.any('SELECT * FROM books WHERE google_volume = $1;',[book_google_vol]);
+        }
       } else {
-        featuredBooks = google_books.slice(1,7); // this determines what books are displayed
+        featuredBooks = google_books.slice(7,13); // this determines what books are displayed
       }
-      const trendingBooks = google_books.slice(7,13);
+      var trendingBooks = trendingBooks.slice(1,7);
+      
       
       // render home page
       res.render('pages/home',{ // render home page while passing data
           user: user,
           username: username,
           books: google_books,
+          randomBooks: randomBooks,
           featuredBooks: featuredBooks,
           trendingBooks: trendingBooks,
       });
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(404);
-      // Handle errors
-    });
+
+    } else { // if db isn't populated
+      // Call API to populate books display upon loading /home
+      axios({
+        url: `https://www.googleapis.com/books/v1/volumes`,
+        method: 'GET',
+        dataType: 'json',
+        headers: {
+          'Accept-Encoding': 'application/json',
+        },
+        params: {
+          key: process.env.API_KEY,
+          q: 'e',
+          maxResults: 40 // cannot exceed 40, limitation set by google
+        },
+      })
+      .then(results => { // process data from API
+        
+        const result_books = results.data.items;
+        
+        var google_books = [];
+        var result_info = [];
+        var image_info = [];
+        for (i = 0; i < 40; i++) {
+          result_info[i] = result_books[i].volumeInfo;
+          image_info[i] = result_info[i].imageLinks;
+
+          google_books[i] = {
+            google_volum: result_books[i].id,
+            thumbnail_link : image_info[i].smallThumbnail,
+            title : result_info[i].title
+          }
+        }
+
+        //console.log(google_books);
+        var randomOffset = Math.floor(Math.random() * 34);
+        var randomBooks = google_books.slice(randomOffset, randomOffset + 6);
+
+        var featuredBooks;
+        if (user) {
+          // temporary || make based off friends and preferencecs if user logged in
+        } else {
+          featuredBooks = google_books.slice(1,7); // this determines what books are displayed
+        }
+        const trendingBooks = google_books.slice(7,13);
+        
+        // render home page
+        res.render('pages/home',{ // render home page while passing data
+            user: user,
+            username: username,
+            books: google_books,
+            randomBooks: randomBooks,
+            featuredBooks: featuredBooks,
+            trendingBooks: trendingBooks,
+        });
+      })
+      .catch(error => {
+        console.log(error);
+        res.status(404);
+        // Handle errors
+      });
+    }
 });
 
 // Discover route
@@ -308,11 +372,12 @@ app.post('/login', async (req, res) => {
               //console.log(google_vol);
 
               // NO AVG RATING INSERTION (intentional)
-              var query = `INSERT INTO books (book_title, author, thumbnail_link, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, convert_partial_date($8)) RETURNING *;`;
+              var query = `INSERT INTO books (book_title, author, thumbnail_link, avg_rating, description, sample, purchase_link, google_volume, publish_date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, convert_partial_date($9)) RETURNING *;`;
               db.any(query, [
                 title,
                 author,
                 thumbnail,
+                0,
                 desc,
                 sample,
                 purchase,
@@ -389,11 +454,10 @@ app.get('/book', (req, res) => {
 
 // fetch book details route
 app.get('/book/:id', async (req, res) => {
-  console.log(req.params);
   const book_google_vol = `${req.params.id}`;
   const username = req.session.user.username;
   try {
-    const book = await db.oneOrNone('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
+    const book = await db.one('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
     var reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = reviews_to_books.review_id WHERE book_id = $1;', [book.id]);
    
     res.render('pages/book', {book, reviews, username}); // render page with books details and reviews
