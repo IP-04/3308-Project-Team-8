@@ -193,6 +193,29 @@ function updateDOM() {
     }
 }
 
+async function hasNotReviewed(username, google_volume) {
+    
+    await fetch('/hasNotReviewed?username=' + username + '&google_volume=' + google_volume, {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        
+        console.log(data);
+        if (data.has_not_reviewed) {
+          openReviewModal();
+        }
+    })
+    .catch(err => {
+        console.log(err);
+    });
+}
+
 function addFriend(user_id, profile_id, user_username) {
     const friend_button_parent = document.getElementById('friend-form');
     const friend_button = document.getElementById('friend-button');

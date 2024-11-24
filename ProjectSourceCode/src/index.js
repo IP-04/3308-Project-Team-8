@@ -494,6 +494,24 @@ app.post('/addReview', async (req, res) => {
   }
 });
 
+// route to check if user has already reviewed
+app.get('/hasNotReviewed', async (req, res) => {
+  try {
+    const username = req.query.username;
+    const google_volume = req.query.google_volume;
+    const review = await db.oneOrNone('SELECT * FROM reviews WHERE username = $1 AND google_volume = $2;',[username, google_volume]);
+    const has_not_reviewed = !review;
+
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({ has_not_reviewed });
+
+  } catch (error){
+    console.log(error);
+    res.status(500);
+  }
+  
+});
+
 // view all reviews for one book route
 app.get('/reviews/:id', async (req, res) => {
   const book_google_vol = `${req.params.id}`;
