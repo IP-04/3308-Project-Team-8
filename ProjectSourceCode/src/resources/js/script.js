@@ -81,6 +81,60 @@ function initializeReviews(reviews) {
     updateDOM();
 }
 
+function addFriend(user_id, profile_id, user_username) {
+    const friend_button_parent = document.getElementById('friend-form');
+    const friend_button = document.getElementById('friend-button');
+    friend_button.innerHTML = 'Remove Friend';
+    friend_button_parent.onsubmit = function (event) {
+        event.preventDefault(); // Prevent form submission
+        removeFriend(user_id, profile_id, user_username);
+        return false;
+    }
+    const friend_list = document.getElementById('friend-list');
+    const new_friend = document.createElement('li');
+    new_friend.className = 'card friend-card bg-light h-100 text-center py-2';
+    new_friend.id = user_id;
+    friend_list.appendChild(new_friend);
+    const new_friend_username = document.createElement('a');
+    new_friend_username.className = 'h6';
+    new_friend_username.innerHTML = user_username;
+    new_friend.appendChild(new_friend_username);
+
+    fetch('/addFriend', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user_id: user_id,
+            profile_id: profile_id
+        })
+    });
+}
+
+function removeFriend(user_id, profile_id, user_username) {
+    const friend_button_parent = document.getElementById('friend-form');
+    const friend_button = document.getElementById('friend-button');
+    friend_button.innerHTML = 'Add Friend';
+    friend_button_parent.onsubmit = function (event) {
+        event.preventDefault(); // Prevent form submission
+        addFriend(user_id, profile_id, user_username);
+        return false;
+    }
+    const old_friend = document.getElementById(user_id);
+    old_friend.remove();
+
+    fetch('/removeFriend', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user_id: user_id,
+            profile_id: profile_id
+        })
+    });
+}
 
 function initializeReviewModal() {
     // Create a modal using JS. The id will be `review-modal`:

@@ -178,6 +178,8 @@ app.get('/profile', async (req, res) => {
   }
   const username = profile.username;
   var description = profile.description;
+  const profile_id = profile.id;
+  const user_id = logged_in_user.id;
   const reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.book_id = books.id WHERE username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY rating DESC LIMIT 15;', [username]);
   const friends = await db.any('SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 10;',[profile.id]);
   const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
@@ -194,7 +196,10 @@ app.get('/profile', async (req, res) => {
   USER_PROFILE = null;
   // Modified profile data for testing
   res.render('pages/profile', {
+    profile_id,
+    user_id,
     username,
+    logged_in_username: logged_in_user.username,
     description,
     liked_books,
     recently_read,
@@ -221,6 +226,26 @@ app.put('/editDesc', async (req, res) => {
   const user = req.session.user;
   await db.none('UPDATE profiles SET description = $1 WHERE profiles.username = $2', [description, user.username]);
   res.redirect(303, '/profile');
+});
+
+// add friend route
+app.post('/addFriend', async (req, res) => {
+  const user_id = req.body.user_id;
+  const friend_id = req.body.profile_id;
+  await db.none('INSERT INTO friends (user_id, friend_id) VALUES ($1, $2),($2, $1);',[user_id, friend_id]);
+  res.status(200);
+});
+
+// remove friend route
+app.post('/removeFriend', async (req, res) => {
+  const user_id = req.body.user_id;
+  const friend_id = req.body.profile_id;
+  console.log(user_id);
+  console.log(friend_id);
+  const query = 'DELETE FROM friends WHERE user_id = $1 AND friend_id = $2;';
+  await db.none(query,[user_id, friend_id]);
+  await db.none(query,[friend_id, user_id]);
+  res.status(200);
 });
 
 // Login route
@@ -364,6 +389,7 @@ app.get('/book', (req, res) => {
 
 // fetch book details route
 app.get('/book/:id', async (req, res) => {
+  console.log(req.params);
   const book_google_vol = `${req.params.id}`;
   const username = req.session.user.username;
   try {

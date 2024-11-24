@@ -78,24 +78,34 @@
                     
                 </section>
                 <section class="col-3" id="friends-list">
-                        <ul class="bg-1 rounded">
+                    <div class="bg-1 rounded">
+                        <ul id="friend-list" class="px-2">
                             <h4 class="text-center pt-2">{{username}}'s Friends</h4>
                             <hr>
                         {{#each friends}}
-                            <li class="d-flex text-center py-2 px-4">
-                                <div class="card friend-card bg-light h-100">
-                                    <a class="h6" href="/profile/{{this.username}}">{{this.username}}</a>
-                                </div>
+                            <li class="card friend-card bg-light h-100 text-center py-2" id="{{this.friend_id}}">
+                                <a class="h6" href="/profile/{{this.username}}">{{this.username}}</a>
                             </li>
                         {{/each}}
-                        {{#if is_friend}}
+                        </ul>
+                        {{#if is_my_profile}}
                             <hr>
                         {{else}}
-                            <hr>
-                            <button class="btn btn-secondary text-center py-2 px-2" action="/addFriend" method="POST">Add Friend</button>
-                            <hr>
+                            {{#if is_friend}}
+                                <hr>
+                                <form class="py-0 bg-1" onsubmit="removeFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}'); return false;" id="friend-form">
+                                    <button id="friend-button" class="btn btn-secondary text-center py-2 px-2">Remove Friend</button>
+                                </form>
+                                <hr>
+                            {{else}}
+                                <hr>
+                                <form class="py-0 bg-1" onsubmit="addFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}'); return false;" id="friend-form">
+                                    <button id="friend-button" class="btn btn-secondary text-center py-2 px-2">Add Friend</button>
+                                </form>
+                                <hr>
+                            {{/if}}
                         {{/if}}
-                        </ul>
+                    </div>
                 </section>
                 
             </section>
