@@ -65,7 +65,6 @@ VALUES
     ('shelby', 'tTfRAQAAQBAJ', 'Lots of good info!', 'This has a lot of good information for those who love horses!', 4.3, true)
     ;
 
-
 INSERT INTO friends
     (user_id, friend_id)
 VALUES
@@ -117,39 +116,39 @@ VALUES
     ;
 
 INSERT INTO reviews_to_books
-    (review_id, book_id)
+    (review_id, google_volume)
 VALUES
-    (1,113),
-    (2,10),
-    (3,116),
-    (4,96),
-    (5,116),
-    (6,121),
-    (7,128),
-    (8,17),
-    (9,96),
-    (10,121),
-    (11,126),
-    (12,107),
-    (13,156),
-    (14,114),
-    (15,106),
-    (16,156),
-    (17,1),
-    (18, 46),
-    (19, 104),
-    (20, 42),
-    (21, 126),
-    (22, 106),
-    (23, 124),
-    (24, 128),
-    (25, 93),
-    (26, 104),
-    (27, 52),
-    (28, 20),
-    (29, 113),
-    (30, 95),
-    (31, 17)
+    (1,'xD9LEAAAQBAJ'),
+    (2,'l-LoEAAAQBAJ'),
+    (3,'7B6cNaP-iwwC'),
+    (4,'zXYpDwAAQBAJ'),
+    (5,'7B6cNaP-iwwC'),
+    (6,'RvfOtAEACAAJ'),
+    (7,'HQBGDwAAQBAJ'),
+    (8,'tTfRAQAAQBAJ'),
+    (9,'zXYpDwAAQBAJ'),
+    (10,'RvfOtAEACAAJ'),
+    (11,'huQ7EAAAQBAJ'),
+    (12,'Ij3EGQAACAAJ'),
+    (13,'0JF0UAw386MC'),
+    (14,'xD9LEAAAQBAJ'),
+    (15,'OKlkzmwy6uoC'),
+    (16,'0JF0UAw386MC'),
+    (17,'gttDCwAAQBAJ'),
+    (18, 'umJVEAAAQBAJ'),
+    (19, 'uNUhEAAAQBAJ'),
+    (20, '4tK3BMnGNCsC'),
+    (21, 'huQ7EAAAQBAJ'),
+    (22, 'OKlkzmwy6uoC'),
+    (23, 'Mt1eEAAAQBAJ'),
+    (24, 'HQBGDwAAQBAJ'),
+    (25, 'VSXrDwAAQBAJ'),
+    (26, 'uNUhEAAAQBAJ'),
+    (27, 'iUT_AwAAQBAJ'),
+    (28, 'Bw2bEAAAQBAJ'),
+    (29, 'k6QnL6DTyDMC'),
+    (30, 'fvPkDwAAQBAJ'),
+    (31, 'tTfRAQAAQBAJ')
     ;
 
 INSERT INTO reviews_to_profiles

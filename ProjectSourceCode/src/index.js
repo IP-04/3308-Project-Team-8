@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
+  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -94,7 +94,7 @@ app.get('/home', async (req, res) => {
   if (user) {username = user.username;}
 
 
-  const top_reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.book_id = books.id WHERE rating > 3.0 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY rating DESC LIMIT 15;');
+  const top_reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.google_volume = books.google_volume WHERE rating > 3.0 GROUP BY books.id, reviews.id, reviews_to_books.review_id, reviews_to_books.google_volume, books.google_volume ORDER BY rating DESC LIMIT 15;');
 
 
   let is_populated = false; // is books database already populated
@@ -251,10 +251,10 @@ app.get('/profile', async (req, res) => {
   var description = profile.description;
   const profile_id = profile.id;
   const user_id = logged_in_user.id;
-  const reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.book_id = books.id WHERE username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY rating DESC LIMIT 15;', [username]);
+  const reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.google_volume = books.google_volume WHERE username = $1 GROUP BY books.id, reviews.id, reviews_to_books.review_id, reviews_to_books.google_volume, books.google_volume ORDER BY rating DESC LIMIT 15;', [username]);
   const friends = await db.any('SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 10;',[profile.id]);
-  const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
-  const recently_read = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.id = book_id INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 GROUP BY reviews.id, reviews_to_books.review_id, reviews_to_books.book_id, books.id ORDER BY reviews.id DESC LIMIT 4;', [username])
+  const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.google_volume = reviews_to_books.google_volume INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
+  const recently_read = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.google_volume = reviews_to_books.google_volume INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 GROUP BY books.id, reviews.id, reviews_to_books.review_id, reviews_to_books.google_volume, books.google_volume ORDER BY reviews.id DESC LIMIT 4;', [username])
   const is_my_profile = (username == logged_in_user.username);
   var is_friend = false;
   friends.forEach(friend => { // determines is the logged in user is on the profile's friend list
@@ -464,7 +464,7 @@ app.get('/book/:id', async (req, res) => {
   const username = req.session.user.username;
   try {
     const book = await db.one('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
-    var reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = reviews_to_books.review_id WHERE book_id = $1;', [book.id]);
+    var reviews = await db.any('SELECT * FROM reviews WHERE google_volume = $1;', [book_google_vol]);
    
     res.render('pages/book', {book, reviews, username}); // render page with books details and reviews
   } catch (error) {
@@ -484,14 +484,13 @@ app.post('/addReview', async (req, res) => {
   }
 
   try {
-    // populate review data and fetch review and book id
+    // populate review data and fetch review id
     var review_id = await db.one('INSERT INTO reviews (username, google_volume, rev_title, rev_description, rating, visibility) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [user.username, google_volume, title, description, rating, visibility]);
-    var book_id = await db.one('SELECT id FROM books WHERE google_volume = $1;',[google_volume]);
     
     // link review, book, and profile in respective tables
-    await db.none('INSERT INTO reviews_to_books (review_id, book_id) VALUES ($1, $2);', [review_id.id, book_id.id]);
+    await db.none('INSERT INTO reviews_to_books (review_id, google_volume) VALUES ($1, $2);', [review_id.id, google_volume]);
     await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
-    await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $2) WHERE id = $1;', [book_id.id, google_volume])
+    await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $1) WHERE google_volume = $1;', [google_volume])
     res.status(200);
     
   } catch (error) {

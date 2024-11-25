@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS users_to_profiles (
 
 CREATE TABLE IF NOT EXISTS reviews_to_books (
 	review_id SMALLINT,
-	book_id SMALLINT
+	google_volume VARCHAR(12) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS reviews_to_profiles (
