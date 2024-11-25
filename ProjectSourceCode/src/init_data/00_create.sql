@@ -66,11 +66,6 @@ CREATE TABLE IF NOT EXISTS reviews_to_books (
 	book_id SMALLINT
 );
 
-CREATE TABLE IF NOT EXISTS profiles_to_books (
-	profile_id SMALLINT,
-	book_id SMALLINT
-);
-
 CREATE TABLE IF NOT EXISTS reviews_to_profiles (
 	review_id SMALLINT,
 	profile_id SMALLINT

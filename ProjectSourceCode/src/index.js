@@ -111,10 +111,15 @@ app.get('/home', async (req, res) => {
       var randomBooks = google_books.slice(randomOffset, randomOffset + 6);
 
       var trendingBooks = await db.any('SELECT * FROM books ORDER BY avg_rating DESC;');
-      var featuredBooks;
+      var featuredBooks = [];
       if (user) {
-        book_google_vol = await db.any('SELECT google_volume FROM reviews WHERE username = (SELECT username FROM users INNER JOIN friends ON users.id = user_id WHERE friend_id = $1) ORDER BY rating DESC LIMIT 6;',[user.id]);
-        featuredBooks = await db.any('SELECT * FROM books WHERE google_volume = $1;',[book_google_vol]);
+        book_google_vol = await db.any('SELECT google_volume FROM reviews INNER JOIN reviews_to_profiles ON reviews.id = reviews_to_profiles.review_id INNER JOIN friends ON friends.user_id = reviews_to_profiles.profile_id WHERE friend_id = $1 ORDER BY rating DESC LIMIT 6;',[user.id]);
+        await book_google_vol.forEach(async item => {
+          google_volume = item.google_volume;
+          var current_book = await db.one('SELECT * FROM books WHERE google_volume = $1;',[google_volume]);
+          if (featuredBooks.length < 6) {featuredBooks.push(current_book);}
+        })
+        
         if (featuredBooks.length < 6) {
           for (let i = 0; i < 6; i++) {
             if (i >= featuredBooks.length) {
