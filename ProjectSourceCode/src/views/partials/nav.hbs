@@ -21,18 +21,26 @@
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="/home">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="/discover">Discover</a></li>
-          {{#if user}}
-            <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+          {{#if logged_in_username}}  <!-- This snippet is because the profile page does not render the user variable -->
+              <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+          {{else}}
+            {{#if user}}
+              <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+            {{/if}}
           {{/if}}
         </ul>
 
         <!-- Login/Register/Logout buttons -->
         <div class="navbar-nav ms-auto">
-          {{#if user}}
-            <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+          {{#if logged_in_username}} <!-- again, this snippet is because the profile page does not render user -->
+              <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
           {{else}}
-            <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-            <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+            {{#if user}}
+              <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+            {{else}}
+              <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+              <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+            {{/if}}
           {{/if}}
         </div>
       </div>

@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
+  host: 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -258,14 +258,15 @@ app.get('/profile', async (req, res) => {
   const is_my_profile = (username == logged_in_user.username);
   var is_friend = false;
   friends.forEach(friend => { // determines is the logged in user is on the profile's friend list
-    if (friend.username == logged_in_user.username) {is_friend = true;} else {is_friend = is_my_profile;}
+    if (!is_friend) { // only check when is_friend is false
+      if (friend.username == logged_in_user.username) {is_friend = true;} else {is_friend = is_my_profile;}
+    }
   });
 
 
   //console.log({username, description, reviews, friends, liked_books});
   
   USER_PROFILE = null;
-  // Modified profile data for testing
   res.render('pages/profile', {
     profile_id,
     user_id,
