@@ -491,7 +491,7 @@ app.post('/addReview', async (req, res) => {
     // link review, book, and profile in respective tables
     await db.none('INSERT INTO reviews_to_books (review_id, google_volume) VALUES ($1, $2);', [review_id.id, google_volume]);
     await db.none('INSERT INTO reviews_to_profiles (review_id, profile_id) VALUES ($1, $2);',[review_id.id, user.id]);
-    await db.none('UPDATE books SET avg_rating = (SELECT ROUND(AVG(rating),2) FROM reviews WHERE google_volume = $1) WHERE google_volume = $1;', [google_volume])
+    await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $1) WHERE google_volume = $1;', [google_volume])
     res.status(200);
     
   } catch (error) {
