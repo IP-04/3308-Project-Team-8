@@ -554,7 +554,7 @@ app.get('/search', async (req, res) => {
 
   // search mechanism
   try {
-    var search = await db.any('SELECT * FROM books WHERE LOWER(book_title) LIKE LOWER($1) OR LOWER(book_title) LIKE LOWER($2) OR LOWER(book_title) LIKE LOWER($3);', [`% ${search_terms} %`,`${search_terms} %`,`% ${search_terms}`]);
+    var search = await db.any('SELECT * FROM books WHERE LOWER(book_title) LIKE LOWER($1) OR LOWER(book_title) LIKE LOWER($2) OR LOWER(book_title) LIKE LOWER($3) OR LOWER(book_title) LIKE LOWER($4);', [`% ${search_terms} %`,`${search_terms} %`,`% ${search_terms}`, `%${search_terms}%`]);
     res.render('pages/search', { books: search, user});
   } catch (error) {
     console.log(error);
