@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
+  host: process.env.DB_HOST || 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -543,24 +543,54 @@ app.get('/search', (req, res) => {
 });*/
 
 // search for books
+// Updated Search Route
 app.get('/search', async (req, res) => {
-  const search_terms = req.query.search_terms;
+  const search_terms = req.query.search_terms; // Capture search input
   const user = req.session.user;
 
   if (!user) {
-    res.status(401).send('Please log in to view all reviews'); // user auth
-    return;
+      return res.status(401).send('Please log in to search'); // Ensure the user is logged in
   }
 
-  // search mechanism
   try {
-    var search = await db.any('SELECT * FROM books WHERE LOWER(book_title) LIKE LOWER($1) OR LOWER(book_title) LIKE LOWER($2) OR LOWER(book_title) LIKE LOWER($3) OR LOWER(book_title) LIKE LOWER($4);', [`% ${search_terms} %`,`${search_terms} %`,`% ${search_terms}`, `%${search_terms}%`]);
-    res.render('pages/search', { books: search, user});
+      // Search for books in the database with titles matching the input
+      const searchResults = await db.any(
+          `SELECT * FROM books WHERE LOWER(book_title) LIKE LOWER($1)`,
+          [`%${search_terms}%`] // Perform a case-insensitive match
+      );
+
+      res.render('pages/search', {
+          books: searchResults,
+          user,
+          search_terms,
+      });
   } catch (error) {
-    console.log(error);
+      console.error('Error fetching search results:', error);
+      res.status(500).send('Error fetching search results');
+  }
+});
+
+// Suggestion Endpoint for Search Bar Autocomplete
+app.get('/search-suggestions', async (req, res) => {
+  const query = req.query.query; // User's input
+
+  if (!query || query.length < 1) {
+      return res.json([]); // Return empty if input is too short
   }
 
+  try {
+      const suggestions = await db.any(
+          `SELECT book_title, author, google_volume FROM books WHERE LOWER(book_title) LIKE LOWER($1) LIMIT 5`,
+          [`%${query}%`]
+      );
+
+      res.json(suggestions); // Send matching books to the frontend
+  } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      res.status(500).send('Error fetching suggestions');
+  }
 });
+
 
 
 // Logout route
