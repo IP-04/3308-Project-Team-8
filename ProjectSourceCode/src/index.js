@@ -382,49 +382,6 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-// rating submission:
-
-app.post('/rate', async (req, res) => {
-  const { book_id, rating } = req.body;
-  const user = req.session.user;
-
-  if (!user) {
-    res.status(401).send('Please log in to rate a book'); // Authentication check
-    return;
-  }
-
-    // Validate book_id and rating
-    if (!book_id || isNaN(book_id) || !rating || isNaN(rating)) {
-      res.status(400).send('Invalid book ID or rating');
-      return;
-    }
-
-  try {
-    // Fetch the book details
-    const book = await db.oneOrNone('SELECT * FROM books WHERE id = $1', [parseInt(book_id)]);
-
-    if (!book) {
-      res.status(404).send('Book not found');
-      return;
-    }
-
-    // Calculate the new average rating
-    let newAvgRating;
-    if (book.avg_rating) {
-      newAvgRating = (book.avg_rating + parseFloat(rating)) / 2;
-    } else {
-      newAvgRating = parseFloat(rating); // If no ratings exist yet
-    }
-
-    // Update the book's average rating in the database
-    await db.none('UPDATE books SET avg_rating = $1 WHERE id = $2', [newAvgRating, book_id]);
-
-    res.status(200).json({ avgRating: newAvgRating }); // Respond with the new average rating
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error submitting rating');
-  }
-});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->

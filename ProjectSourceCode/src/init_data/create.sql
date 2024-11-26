@@ -16,21 +16,13 @@ CREATE TABLE IF NOT EXISTS books (
 	title VARCHAR(1000),
 	author VARCHAR(200),
 	thumbnail_link VARCHAR(200),
-	avg_rating FLOAT DEFAULT 0, -- Average rating for the book
-	rating_count INT DEFAULT 0, -- Number of ratings
+	avg_rating FLOAT,
+	rating_count INT,
 	description VARCHAR(5000),
 	sample VARCHAR(5000),
 	purchase_link VARCHAR(200),
 	google_volume VARCHAR(12) NOT NULL UNIQUE 
 ); 
-
---added ratings for the books
-CREATE TABLE IF NOT EXISTS ratings (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
-    book_id INT REFERENCES books(id),
-    rating FLOAT NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS reviews (
 	id SERIAL PRIMARY KEY,
