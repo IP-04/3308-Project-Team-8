@@ -26,6 +26,12 @@
           {{else}}
             {{#if user}}
               <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+              <li class="nav-item">
+                <form class="px-0 py-0 bg-1" id="search-form" action="/search" method="GET">
+                  <input style="border-color: #d98324" id="search-bar" name="search_terms" type="text" placeholder="Search for Books..." required>
+                  <button class="hidden" type="submit"></button>
+                </form>
+              </li>
             {{/if}}
           {{/if}}
         </ul>

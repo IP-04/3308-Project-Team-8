@@ -42,6 +42,7 @@
                 }
                 //If the username or password was entered incorrectly, put text in username Error div
             } catch (error) {
+                console.log(error);
                 formError.textContent = 'Invalid Username or Password';
             }
         });

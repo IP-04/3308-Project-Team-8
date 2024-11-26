@@ -1,4 +1,4 @@
-/* run this after resetting cloud/local db, otherwise avg_rating won't be calculated*/
+/* run this after populating cloud/local db, otherwise avg_rating won't be calculated*/
 
 /*
 UPDATE books SET avg_rating = (SELECT ROUND(AVG(rating),2) FROM reviews WHERE google_volume = 'xD9LEAAAQBAJ') WHERE google_volume = 'xD9LEAAAQBAJ';

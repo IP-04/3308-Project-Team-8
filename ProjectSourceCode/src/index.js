@@ -532,6 +532,37 @@ app.get('/reviews/:id', async (req, res) => {
   res.render('pages/reviews', {user, reviews}); 
 });
 
+//load search results
+/*let SEARCH_RESULTS = null;
+app.get('/search', (req, res) => {
+  if (SEARCH_RESULTS) {
+    res.render('pages/book', {books: SEARCH_RESULTS}); 
+  } else {
+    res.redirect('pages/home'); // redirects invalid path to home
+  }
+});*/
+
+// search for books
+app.get('/search', async (req, res) => {
+  const search_terms = req.query.search_terms;
+  const user = req.session.user;
+
+  if (!user) {
+    res.status(401).send('Please log in to view all reviews'); // user auth
+    return;
+  }
+
+  // search mechanism
+  try {
+    var search = await db.any('SELECT * FROM books WHERE LOWER(book_title) LIKE LOWER($1) OR LOWER(book_title) LIKE LOWER($2) OR LOWER(book_title) LIKE LOWER($3);', [`% ${search_terms} %`,`${search_terms} %`,`% ${search_terms}`]);
+    res.render('pages/search', { books: search, user});
+  } catch (error) {
+    console.log(error);
+  }
+
+});
+
+
 // Logout route
 app.get('/logout', (req, res) => {
   req.session.destroy();
