@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: 'dpg-csvplfhu0jms738b8sbg-a', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
+  host: 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -450,10 +450,10 @@ const auth = (req, res, next) => {
 
 app.use(auth);
 
-// Book route
+// Backup Book route
 app.get('/book', (req, res) => {
-  if (book && reviews && username) {
-    res.render('pages/book', { book, reviews, username}); 
+  if (book && reviews && username && user) {
+    res.render('pages/book', { book, reviews, username, user}); 
   } else {
     res.redirect('pages/home'); // redirects invalid path to home
   }
@@ -462,12 +462,13 @@ app.get('/book', (req, res) => {
 // fetch book details route
 app.get('/book/:id', async (req, res) => {
   const book_google_vol = `${req.params.id}`;
-  const username = req.session.user.username;
+  const user = req.session.user;
+  const username = user.username;
   try {
     const book = await db.one('SELECT * FROM books WHERE google_volume = $1;', [book_google_vol]);
     var reviews = await db.any('SELECT * FROM reviews WHERE google_volume = $1;', [book_google_vol]);
    
-    res.render('pages/book', {book, reviews, username}); // render page with books details and reviews
+    res.render('pages/book', {book, reviews, username, user}); // render page with books details and reviews
   } catch (error) {
     console.log(error);
     res.status(500).send('Error fetching book details');

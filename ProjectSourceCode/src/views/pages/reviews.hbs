@@ -4,9 +4,9 @@
         {{#each reviews}}
             {{#if this.visibility}}
                 <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
-                    <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.title}}</strong>
+                    <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
                     <a href = '/user/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
-                    <div class="h7 text-start position-relative py-1">{{this.description}}</div>
+                    <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
                 </li>
             {{/if}}
         {{/each}}

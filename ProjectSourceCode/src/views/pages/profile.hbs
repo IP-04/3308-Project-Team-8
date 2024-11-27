@@ -23,7 +23,7 @@
                             <textarea class="col-sm-8 h-40" type="text" id="profile-desc" name="description" pattern=".{1,250}" style="height: 100px">{{description}}</textarea>
                         </div>
                         
-                        <button id="close_button" class="btn btn-secondary ms-3" type="button" onclick="closeReviewModal();">
+                        <button id="close_button" class="btn btn-secondary ms-3" type="button" onclick="closeProfileModal()">
                         Cancel
                         </button>
                         <button id="submit_button" class="btn btn-primary" type="submit">
@@ -101,13 +101,13 @@
                         {{else}}
                             {{#if is_friend}}
                                 <hr>
-                                <form class="py-0 bg-1" onsubmit="removeFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}'); return false;" id="friend-form">
+                                <form class="py-0 bg-1" onsubmit="removeFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}','{{username}}'); return false;" id="friend-form">
                                     <button id="friend-button" class="btn btn-secondary text-center py-2 px-2">Remove {{username}} from Friends</button>
                                 </form>
                                 <hr>
                             {{else}}
                                 <hr>
-                                <form class="py-0 bg-1" onsubmit="addFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}'); return false;" id="friend-form">
+                                <form class="py-0 bg-1" onsubmit="addFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}','{{username}}'); return false;" id="friend-form">
                                     <button id="friend-button" class="btn btn-secondary text-center py-2 px-2">Add {{username}} to Friends</button>
                                 </form>
                                 <hr>
@@ -127,10 +127,20 @@
                                 <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
                                     <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
                                     <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
-                                    <a href = '/user/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                    <a href = '/profile/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
                                     <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
                                 </li>
+                            {{else}}
+                                {{#if is_my_profile}}
+                                    <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
+                                        <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
+                                        <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
+                                        <a href = '/profile/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                        <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
+                                    </li>
+                                {{/if}}
                             {{/if}}
+
                         {{/each}}
                     </ul>
                 {{else}}

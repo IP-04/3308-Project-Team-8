@@ -195,13 +195,13 @@ async function hasNotReviewed(username, google_volume) {
     });
 }
 
-function addFriend(user_id, profile_id, user_username) {
+function addFriend(user_id, profile_id, user_username, profile_username) {
     const friend_button_parent = document.getElementById('friend-form');
     const friend_button = document.getElementById('friend-button');
-    friend_button.innerHTML = 'Remove Friend';
+    friend_button.innerHTML = 'Remove '+ profile_username + ' from Friends';
     friend_button_parent.onsubmit = function (event) {
         event.preventDefault(); // Prevent form submission
-        removeFriend(user_id, profile_id, user_username);
+        removeFriend(user_id, profile_id, user_username, profile_username);
         return false;
     }
     const friend_list = document.getElementById('friend-list');
@@ -226,13 +226,13 @@ function addFriend(user_id, profile_id, user_username) {
     });
 }
 
-function removeFriend(user_id, profile_id, user_username) {
+function removeFriend(user_id, profile_id, user_username, profile_username) {
     const friend_button_parent = document.getElementById('friend-form');
     const friend_button = document.getElementById('friend-button');
-    friend_button.innerHTML = 'Add Friend';
+    friend_button.innerHTML = 'Add ' + profile_username + ' to Friends';
     friend_button_parent.onsubmit = function (event) {
         event.preventDefault(); // Prevent form submission
-        addFriend(user_id, profile_id, user_username);
+        addFriend(user_id, profile_id, user_username, profile_username);
         return false;
     }
     const old_friend = document.getElementById(user_id);

@@ -16,17 +16,17 @@
                         </div>
                         <div class="row mb-3">
                             <label class="form-label col-sm-3 ms-3"><strong>Rating</strong></label>
-                            <input class="col-sm-8" type="text" id="review_rating" name="rating" pattern="[1-5]|[1-5]\.[0-9]" placeholder="Rate from 1.0 to 5.0">
+                            <input class="col-sm-8" type="text" id="review_rating" name="rating" pattern="[1-5]|[1-4]\.[0-9]|^5.0$" placeholder="Rate from 1.0 to 5.0">
                         </div>
                         <div class="row mb-3">
                             <label class="form-label col-sm-3 ms-3"><strong>Description</strong></label><br>
-                            <textarea class="col-sm-8 h-20" type="text" id="review_desc" name="description" pattern=".{1,250}" style="height: 100px" placeholder="What did you think about this book? (up to 250 characters)"></textarea>
+                            <textarea class="col-sm-8 h-20" type="text" id="review_desc" name="description" maxLength="250" style="height: 100px" placeholder="What did you think about this book? (up to 250 characters)"></textarea>
                         </div>
                         <div class="row mb-3">
                             <label class="form-label col-sm-3 ms-3"><strong>Visibility</strong></label>
                             <select class="col-sm-8" id="review_visibility" name="visibility" class="form-select">
                                 <option value="true">Public</option>
-                                <option value="false">Friends Only</option>
+                                <option value="false">Private</option>
                             </select>
                         </div>
                             <input type="hidden" value="{{book.google_volume}}" id="review_google_vol">
