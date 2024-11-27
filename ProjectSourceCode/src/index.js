@@ -28,7 +28,7 @@ const hbs = handlebars.create({
 
 // database configuration
 const dbConfig = {
-  host: process.env.DB_HOST || 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
+  host: 'db', // the database server toggle between 'db' and 'dpg-csvplfhu0jms738b8sbg-a' for local or cloud hosting
   port: 5432, // the database port
   database: process.env.POSTGRES_DB, // the database name
   user: process.env.POSTGRES_USER, // the user account to connect with
@@ -553,10 +553,10 @@ app.get('/search', async (req, res) => {
   }
 
   try {
-      // Search for books in the database with titles matching the input
+      // Search for books in the database 
       const searchResults = await db.any(
           `SELECT * FROM books WHERE LOWER(book_title) LIKE LOWER($1)`,
-          [`%${search_terms}%`] // Perform a case-insensitive match
+          [`%${search_terms}%`] //case-insensitive match
       );
 
       res.render('pages/search', {
