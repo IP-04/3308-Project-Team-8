@@ -1,20 +1,136 @@
 
-    <main class="container">
+    <main class="container flex-grow px-0">
         <div class="profile-header bg-shade">
-            <h1 class="text-light">{{user.username}}'s Profile</h1>
-            <p class="text-light">Welcome to your profile page!</p>
+            {{#if is_my_profile}}
+                <h1 class="text-light ms-3 py-2">Your Profile</h1>
+            {{else}}
+                <h1 class="text-light ms-3 py-2">{{username}}'s Profile</h1>
+            {{/if}}
         </div>
 
-        <div class="profile-content">
+        <!-- Modal elements -->
+        <div class="modal" tabindex="-1" id="profile-modal">
+            <div class="modal-dialog">
+            <div class="modal-content bg-1">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User Description</h5>
+                </div>
+                <div class="modal-body bg-2"></div>
+                    <form id="review-form" onsubmit="updateProfileFromModal(); return false;">
+                        <!-- Include form fields to gather the information listed below. -->
+                        <div class="row mb-3">
+                            <label class="form-label col-sm-3 ms-3"><strong>Description</strong></label><br>
+                            <textarea class="col-sm-8 h-40" type="text" id="profile-desc" name="description" pattern=".{1,250}" style="height: 100px">{{description}}</textarea>
+                        </div>
+                        
+                        <button id="close_button" class="btn btn-secondary ms-3" type="button" onclick="closeReviewModal();">
+                        Cancel
+                        </button>
+                        <button id="submit_button" class="btn btn-primary" type="submit">
+                        Save
+                        </button>
+                    </form>      
+                <div class="modal-footer bg-2"></div>
+            </div>
+            </div>
+        </div>
+
+
+
+        <div class="profile-content ms-3">
+            <section class="row" id="top-content">
+                <section class="col-8" id="profile-books">
+                    <section class="row" id="description">
+                        {{#if is_my_profile}}
+                        <h4> About {{username}} <button class="btn btn-primary" onclick="openProfileModal()">Edit Description</button></h4>
+                        {{else}}
+                        <h4> About {{username}} </h4>
+                        {{/if}}
+                        <div id="html-desc-div">
+                            <p id="html-desc">{{description}}</p>
+                        </div>
+                    </section>
+                    <hr>
+                    <section class="row" id="liked-books">
+                        <h4>Liked Books</h4>
+                        {{#each liked_books}}
+                            <li class="col-3 d-flex justify-content-center">
+                                <div class=" card book-card bg-1 h-100">
+                                    <img src="{{this.thumbnail_link}}" alt="{{this.book_title}} Cover" class="card-img-top book-cover">
+                                    <div class="card-body book-info bg-light rounded-bottom">
+                                        <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </li>
+                        {{/each}}
+                    </section>
+                    <br>
+                    <section class="row" id="recently-read">
+                        <h4>Recently Read</h4>
+                        {{#each recently_read}}
+                            <li class="col-3 d-flex justify-content-center">
+                                <div class=" card book-card bg-1 h-100">
+                                    <img src="{{this.thumbnail_link}}" alt="{{this.book_title}} Cover" class="card-img-top book-cover">
+                                    <div class="card-body book-info bg-light rounded-bottom">
+                                        <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </li>
+                        {{/each}}
+                    </section>
+                    
+                    
+                </section>
+                <section class="col-3" id="friends-list">
+                    <div class="bg-1 rounded">
+                        <ul id="friend-list" class="px-2">
+                            {{#if is_my_profile}}
+                            <h4 class="text-center pt-2">Your Friends</h4>
+                            {{else}}
+                            <h4 class="text-center pt-2">{{username}}'s Friends</h4>
+                            {{/if}}
+                            <hr>
+                        {{#each friends}}
+                            <li class="card friend-card bg-light h-100 text-center py-2" id="{{this.friend_id}}">
+                                <a class="h6" href="/profile/{{this.username}}">{{this.username}}</a>
+                            </li>
+                        {{/each}}
+                        </ul>
+                        {{#if is_my_profile}}
+                            <hr>
+                        {{else}}
+                            {{#if is_friend}}
+                                <hr>
+                                <form class="py-0 bg-1" onsubmit="removeFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}'); return false;" id="friend-form">
+                                    <button id="friend-button" class="btn btn-secondary text-center py-2 px-2">Remove {{username}} from Friends</button>
+                                </form>
+                                <hr>
+                            {{else}}
+                                <hr>
+                                <form class="py-0 bg-1" onsubmit="addFriend('{{user_id}}',{{profile_id}},'{{logged_in_username}}'); return false;" id="friend-form">
+                                    <button id="friend-button" class="btn btn-secondary text-center py-2 px-2">Add {{username}} to Friends</button>
+                                </form>
+                                <hr>
+                            {{/if}}
+                        {{/if}}
+                    </div>
+                </section>
+                
+            </section>
+            <hr>
             <section class="reviews">
-                <h2 class="text-primary">User Reviews</h2>
-                {{#if reviews.length}}
+                <h2>Reviews</h2>
+                {{#if reviews}}
                     <ul>
                         {{#each reviews}}
-                            <li>
-                                <strong>{{this.title}}</strong> - {{this.date}}
-                                <p>{{this.reviewText}}</p>
-                            </li>
+                            {{#if this.visibility}}
+                                <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
+                                    <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
+                                    <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
+                                    <a href = '/user/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                    <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
+                                </li>
+                            {{/if}}
                         {{/each}}
                     </ul>
                 {{else}}
@@ -22,33 +138,11 @@
                 {{/if}}
             </section>
 
-            <section class="genres">
-                <h2 class="text-primary">Favorite Genres</h2>
-                {{#if genres.length}}
-                    <ul>
-                        {{#each genres}}
-                            <li class="bg-dark text-light">{{this}}</li>
-                        {{/each}}
-                    </ul>
-                {{else}}
-                    <p class="text-shade">No favorite genres listed yet!</p>
-                {{/if}}
-            </section>
+            <section></section><br>
+            <section></section><br>
+            <section></section><br>
+            <section></section>
 
-            <section class="friends">
-                <h2 class="text-primary">Friend Activity</h2>
-                {{#if friends.length}}
-                    <ul>
-                        {{#each friends}}
-                            <li>
-                                <strong>{{this.name}}</strong> - {{this.activity}} <span class="text-secondary">({{this.timeAgo}})</span>
-                            </li>
-                        {{/each}}
-                    </ul>
-                {{else}}
-                    <p class="text-shade">No friend activity available!</p>
-                {{/if}}
-            </section>
         </div>
     </main>
 

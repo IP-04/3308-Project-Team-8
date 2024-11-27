@@ -5,27 +5,6 @@ let MAX_REVIEWS;
 let REVIEW_COUNT = 0;
 let NEW_REVIEW;
 
-/*function checkSession(username) {
-    const loginBtn = document.getElementById('loginbtn');
-    const logoutBtn = document.getElementById('logoutbtn');
-    const registerBtn = document.getElementById('registerbtn');
-    const profileBtn = document.getElementById('profilebtn');
-    if(username = "Guest") {
-        loginBtn.classList.replace('hidden', 'nav-item');
-        registerBtn.classList.replace('hidden', 'nav-item');
-
-        logoutBtn.classList.replace('nav-item', 'hidden');
-        profileBtn.classList.replace('nav-item', 'hidden');
-    } else {
-        logoutBtn.classList.replace('hidden', 'nav-item');
-        profileBtn.classList.replace('hidden', 'nav-item');
-
-        loginBtn.classList.replace('nav-item', 'hidden');
-        registerBtn.classList.replace('nav-item', 'hidden');
-    }
-    
-}*/
-
 // Creates card to fill with review information
 function createBootstrapCard(id) {
     // Use `document.createElement()` function to create a `div`
@@ -41,7 +20,12 @@ function createBootstrapCard(id) {
 function createReviewTitle(text, rating) {
     const title = document.createElement('div');
     title.className = 'h6 text-start position-relative py-0';
-    title.innerHTML = rating + '/5.0 - ' + text;
+    if (rating == null) {
+        title.innerHTML = text;
+        title.id = 'empty-reviews';
+    } else {
+        title.innerHTML = rating + '/5.0 - ' + text;
+    }
     return title;
 }
 // Review data populating rating and username
@@ -49,7 +33,8 @@ function createReviewUser(username) {
     const user_link = document.createElement('a');
     user_link.className = 'h8 text-start position-relative py-0';
     user_link.innerHTML = 'Reviewed by: ' + username;
-    user_link.href = `/user/${{username}}`;
+    console.log(username);
+    user_link.href = '/profile/'+ username;
     user_link.style = 'text-decoration: none; color: #d19c1d;';
     return user_link;
 }
@@ -79,7 +64,6 @@ function initializeReviews(reviews) {
 
     updateDOM();
 }
-
 
 function initializeReviewModal() {
     // Create a modal using JS. The id will be `review-modal`:
@@ -114,8 +98,8 @@ function updateReviewsFromModal() {
         id: id,
         username: username,
         google_volume: google_volume,
-        title: title,
-        description: description,
+        rev_title: title,
+        rev_description: description,
         rating: rating,
         visibility: visibility,
     }]
@@ -127,7 +111,7 @@ function updateReviewsFromModal() {
     updateDOM();
     REVIEW_MODAL.hide();
     
-    fetch('http://localhost:3000/addReview', {
+    fetch('/addReview', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -151,11 +135,13 @@ function updateDOM() {
     if (MAX_REVIEWS < 6) {MAX_REVIEWS = REVIEW_COUNT}
 
     if (REVIEWS[0] == undefined) {
-        var no_reviews = createReviewTitle('No reviews for this book yet. Be the first to review!');
+        var no_reviews = createReviewTitle('No reviews for this book yet. Be the first to review!', null);
         container.appendChild(no_reviews);
         return;
     }
     for (let i = 0; i < MAX_REVIEWS; i++) {
+        const empty_reviews = document.getElementById('empty-reviews');
+        if (empty_reviews) {empty_reviews.remove()}
         console.log(REVIEWS[i]);
         var current_review = REVIEWS[i];
         if(NEW_REVIEW == current_review) {current_review = current_review[0]} // this removes a weird json parsing artifact from the data
@@ -172,13 +158,13 @@ function updateDOM() {
 
             container.appendChild(card);
             
-            var card_title = createReviewTitle(current_review.title, current_review.rating);
+            var card_title = createReviewTitle(current_review.rev_title, current_review.rating);
             card.appendChild(card_title);
 
             var card_user = createReviewUser(current_review.username);
             card.appendChild(card_user);
 
-            var card_desc = createReviewDesc(current_review.description);
+            var card_desc = createReviewDesc(current_review.rev_description);
             card.appendChild(card_desc);
 
             console.log(card);
@@ -186,6 +172,114 @@ function updateDOM() {
     }
 }
 
+async function hasNotReviewed(username, google_volume) {
+    
+    await fetch('/hasNotReviewed?username=' + username + '&google_volume=' + google_volume, {
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        
+        console.log(data);
+        if (data.has_not_reviewed) {
+          openReviewModal();
+        }
+    })
+    .catch(err => {
+        console.log(err);
+    });
+}
+
+function addFriend(user_id, profile_id, user_username) {
+    const friend_button_parent = document.getElementById('friend-form');
+    const friend_button = document.getElementById('friend-button');
+    friend_button.innerHTML = 'Remove Friend';
+    friend_button_parent.onsubmit = function (event) {
+        event.preventDefault(); // Prevent form submission
+        removeFriend(user_id, profile_id, user_username);
+        return false;
+    }
+    const friend_list = document.getElementById('friend-list');
+    const new_friend = document.createElement('li');
+    new_friend.className = 'card friend-card bg-light h-100 text-center py-2';
+    new_friend.id = user_id;
+    friend_list.appendChild(new_friend);
+    const new_friend_username = document.createElement('a');
+    new_friend_username.className = 'h6';
+    new_friend_username.innerHTML = user_username;
+    new_friend.appendChild(new_friend_username);
+
+    fetch('/addFriend', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user_id: user_id,
+            profile_id: profile_id
+        })
+    });
+}
+
+function removeFriend(user_id, profile_id, user_username) {
+    const friend_button_parent = document.getElementById('friend-form');
+    const friend_button = document.getElementById('friend-button');
+    friend_button.innerHTML = 'Add Friend';
+    friend_button_parent.onsubmit = function (event) {
+        event.preventDefault(); // Prevent form submission
+        addFriend(user_id, profile_id, user_username);
+        return false;
+    }
+    const old_friend = document.getElementById(user_id);
+    old_friend.remove();
+
+    fetch('/removeFriend', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            user_id: user_id,
+            profile_id: profile_id
+        })
+    });
+}
+
+let PROFILE_MODAL;
+function openProfileModal() {
+    PROFILE_MODAL = new bootstrap.Modal(document.getElementById('profile-modal'));
+    PROFILE_MODAL.show();
+}
+function closeProfileModal() { // when cancel button is clicked
+    PROFILE_MODAL.hide();
+}
+function updateProfileFromModal() {
+    const new_desc = document.getElementById('profile-desc').value;
+
+    const desc_element = document.getElementById('html-desc-div');
+    const html_desc = document.getElementById('html-desc');
+    if (html_desc != null) {html_desc.remove();}
+
+    var new_desc_element = document.createElement('p');
+    new_desc_element.innerHTML = new_desc;
+    new_desc_element.id = 'html-desc';
+
+    desc_element.appendChild(new_desc_element);
+
+    fetch('/editDesc', {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({description: new_desc})
+    });
+    closeProfileModal();
+}
 
 //function to change visibility of the password on click
 function togglePasswordVisibility(){
@@ -199,3 +293,31 @@ function togglePasswordVisibility(){
 	}
 }
 
+// added function for the search bar
+async function fetchSuggestions(query) {
+    const suggestionBox = document.getElementById('suggestions');
+    suggestionBox.innerHTML = ''; // Clear previous suggestions
+
+    if (query.length < 3) return; // Fetch only if query length >= 3
+
+    try {
+        const response = await fetch(`/search-suggestions?query=${encodeURIComponent(query)}`);
+        const suggestions = await response.json();
+
+        if (suggestions.length > 0) {
+            suggestions.forEach((book) => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'suggestion-item text-dark p-2';
+                suggestion.innerHTML = `<strong>${book.book_title}</strong> by ${book.author}`;
+                suggestion.onclick = () => {
+                    window.location.href = `/book/${book.google_volume}`;
+                };
+                suggestionBox.appendChild(suggestion);
+            });
+        } else {
+            suggestionBox.innerHTML = '<div class="suggestion-item text-dark p-2">No results found</div>';
+        }
+    } catch (err) {
+        console.error('Error fetching suggestions:', err);
+    }
+}

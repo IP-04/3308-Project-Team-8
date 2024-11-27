@@ -5,6 +5,28 @@
             <p>Your go-to platform for sharing and discovering book reviews.</p>
         </section>
 
+        <section id="random-books" class="container-fluid">
+            <h2>Random Books</h2>
+            {{#if randomBooks}}
+                <ul class="row">
+                    {{#each randomBooks}}
+                        <li class="col-2 d-flex justify-content-center">
+                            <div class=" card book-card bg-1 h-100">
+                                <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
+                                <div class="card-body book-info bg-light rounded-bottom">
+                                    <!--<p class="card-title">{{this.volumeInfo.title}}</p> commented out because displayed in thumbnail, maybe add tooltip?
+                                    <p class="card-text">{{this.volumeInfo.authors.[0]}}</p>--> 
+                                    <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
+                                </div>
+                            </div>
+                        </li>
+                    {{/each}}
+                </ul><br>
+            {{else}}
+                <p>No random books at the moment. Check back later!</p>
+            {{/if}}
+        </section>
+
         <section id="featured-books" class="container-fluid">
             <h2>Featured Books</h2>
             {{#if featuredBooks}}
@@ -12,11 +34,11 @@
                     {{#each featuredBooks}}
                         <li class="col-2 d-flex justify-content-center">
                             <div class=" card book-card bg-1 h-100">
-                                <img src="{{this.volumeInfo.imageLinks.smallThumbnail}}" alt="{{this.volumeInfo.title}} Cover" class="card-img-top book-cover">
+                                <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
                                 <div class="card-body book-info bg-light rounded-bottom">
                                     <!--<p class="card-title">{{this.volumeInfo.title}}</p> commented out because displayed in thumbnail, maybe add tooltip?
                                     <p class="card-text">{{this.volumeInfo.authors.[0]}}</p>--> 
-                                    <a href="/book/{{this.id}}" class="btn btn-primary">View Details</a>
+                                    <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
                                 </div>
                             </div>
                         </li>
@@ -34,11 +56,11 @@
                     {{#each trendingBooks}}
                         <li class="col-2 d-flex justify-content-center">
                             <div class=" card book-card bg-1 h-100">
-                                <img src="{{this.volumeInfo.imageLinks.smallThumbnail}}" alt="{{this.volumeInfo.title}} Cover" class="card-img-top book-cover">
+                                <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
                                 <div class="card-body book-info bg-light rounded-bottom">
                                     <!--<p class="card-title">{{this.volumeInfo.title}}</p> commented out because displayed in thumbnail, maybe add tooltip?
                                     <p class="card-text">{{this.volumeInfo.authors.[0]}}</p>--> 
-                                    <a href="/book/{{this.id}}" class="btn btn-primary">View Details</a>
+                                    <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
                                 </div>
                             </div>
                         </li>
@@ -49,16 +71,19 @@
             {{/if}}
         </section>
 
-        <section class="top-reviews">
+        <section class="top-reviews container-fluid">
             <h2>Top-Rated Reviews</h2>
-            {{#if topReviews.length}}
+            {{#if reviews}}
                 <ul>
-                    {{#each topReviews}}
-                        <li>
-                            <h3>{{this.bookTitle}}</h3>
-                            <p><strong>{{this.user}}:</strong> {{this.reviewText}}</p>
-                            <p>Rating: {{this.rating}}/5</p>
-                        </li>
+                    {{#each reviews}}
+                        {{#if this.visibility}}
+                            <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
+                                <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
+                                <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
+                                <a href = '/profile/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
+                            </li>
+                        {{/if}}
                     {{/each}}
                 </ul>
             {{else}}
