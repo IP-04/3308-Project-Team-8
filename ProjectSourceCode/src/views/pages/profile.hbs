@@ -90,11 +90,17 @@
                             <h4 class="text-center pt-2">{{username}}'s Friends</h4>
                             {{/if}}
                             <hr>
-                        {{#each friends}}
-                            <li class="card friend-card bg-light h-100 text-center py-2" id="{{this.friend_id}}">
-                                <a class="h6" href="/profile/{{this.username}}">{{this.username}}</a>
-                            </li>
-                        {{/each}}
+                            {{#if friends}}
+                                {{#each friends}}
+                                    <li class="card friend-card bg-light h-100 text-center py-2" id="{{this.friend_id}}">
+                                        <a class="h6" href="/profile/{{this.username}}">{{this.username}}</a>
+                                    </li>
+                                {{/each}}
+                            {{else}}
+                                <h5 class="text-center">No friends yet!</h5>
+                            {{/if}}
+                            
+                            
                         </ul>
                         {{#if is_my_profile}}
                             <hr>
@@ -125,7 +131,7 @@
                         {{#each reviews}}
                             {{#if this.visibility}}
                                 <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
-                                    <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
+                                    <h5 class="pt-2">For Book: <a class="text-dark" href="/book/{{this.google_volume}}">{{this.book_title}}</a></h5>
                                     <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
                                     <a href = '/profile/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
                                     <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
@@ -133,9 +139,9 @@
                             {{else}}
                                 {{#if is_my_profile}}
                                     <li class="card m-1 d-flex bg-light rounded px-1 px-md-2" id='review_card_{{this.id}}'>
-                                        <h5 class="pt-2">For Book: <u>{{this.book_title}}</u></h5>
+                                        <h5 class="pt-2">For Book: <a class="text-dark" href="/book/{{this.google_volume}}">{{this.book_title}}</a></h5>
                                         <strong class="h6 text-start position-relative py-0">{{this.rating}}/5.0 - {{this.rev_title}}</strong>
-                                        <a href = '/profile/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}}</a>
+                                        <a href = '/profile/{{this.username}}' class="h8 text-start position-relative py-0" style="text-decoration: none; color: #d19c1d;">Reviewed by: {{this.username}} - View Profile</a>
                                         <div class="h7 text-start position-relative py-1">{{this.rev_description}}</div>
                                     </li>
                                 {{/if}}

@@ -32,7 +32,7 @@ function createReviewTitle(text, rating) {
 function createReviewUser(username) {
     const user_link = document.createElement('a');
     user_link.className = 'h8 text-start position-relative py-0';
-    user_link.innerHTML = 'Reviewed by: ' + username;
+    user_link.innerHTML = 'Reviewed by: ' + username + ' - View Profile';
     console.log(username);
     user_link.href = '/profile/'+ username;
     user_link.style = 'text-decoration: none; color: #d19c1d;';
@@ -237,6 +237,12 @@ function removeFriend(user_id, profile_id, user_username, profile_username) {
     }
     const old_friend = document.getElementById(user_id);
     old_friend.remove();
+    if (document.querySelector(".friend-card") == null) {
+        const list = document.getElementById('friend-list');
+        list.appendChild('h5');
+        list.className('text-center');
+        list.innerHTML('No friends yet!')
+    }
 
     fetch('/removeFriend', {
         method: 'POST',
