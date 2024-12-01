@@ -174,3 +174,30 @@ nav {
 .text-shade {
     color: #605c4e;
 }
+
+/* Styling for the search bar */
+
+/* added for the search bar suggestions */
+
+.suggestion-box {
+    position: absolute;
+    top: 100%; /* Display below the search bar */
+    background-color: var(--bs-bg-light, #f1f7ed);
+    border: 1px solid #d19c1d;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: var(--bs-btn-hover-bg, #d98324);
+    color: var(--bs-btn-color, #363020);
+}
+

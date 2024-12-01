@@ -1,13 +1,32 @@
 <main class="ms-3 container flex-grow px-0">
+    <!-- Search Section -->
     <section id="search-books" class="container-fluid">
-        <h2 class="pt-2">Results:</h2>
+        <h2 class="pt-2">Search for Books</h2>
+        <div class="search-container position-relative">
+            <input
+                type="text"
+                id="search-bar"
+                class="form-control"
+                placeholder="Search for books..."
+                onkeyup="fetchSuggestions(this.value)"
+                autocomplete="off"
+            />
+            <div id="suggestions" class="suggestion-box bg-light border rounded"></div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="search-results" class="container-fluid pt-3">
+        <h3>Results:</h3>
         {{#if books}}
             <ul class="row">
                 {{#each books}}
                     <li class="col-2 d-flex py-4">
-                        <div class=" card book-card bg-1 h-100">
+                        <div class="card book-card bg-1 h-100">
                             <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
                             <div class="card-body book-info bg-light rounded-bottom">
+                                <h5 class="card-title">{{this.title}}</h5>
+                                <p class="card-text">{{this.author}}</p>
                                 <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
                             </div>
                         </div>
@@ -15,7 +34,9 @@
                 {{/each}}
             </ul><br>
         {{else}}
-            <p>No books found.</p>
+            <p>No books found. Try another search!</p>
         {{/if}}
     </section>
 </main>
+
+

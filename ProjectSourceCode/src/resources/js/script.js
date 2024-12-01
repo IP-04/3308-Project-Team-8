@@ -311,3 +311,32 @@ function togglePasswordVisibility(){
 		x.type = "password";
 	}
 }
+
+// added function for the search bar
+async function fetchSuggestions(query) {
+    const suggestionBox = document.getElementById('suggestions');
+    suggestionBox.innerHTML = ''; // Clear previous suggestions
+
+    if (query.length < 3) return; // Fetch only if query length >= 3
+
+    try {
+        const response = await fetch(`/search-suggestions?query=${encodeURIComponent(query)}`);
+        const suggestions = await response.json();
+
+        if (suggestions.length > 0) {
+            suggestions.forEach((book) => {
+                const suggestion = document.createElement('div');
+                suggestion.className = 'suggestion-item text-dark p-2';
+                suggestion.innerHTML = `<strong>${book.book_title}</strong> by ${book.author}`;
+                suggestion.onclick = () => {
+                    window.location.href = `/book/${book.google_volume}`;
+                };
+                suggestionBox.appendChild(suggestion);
+            });
+        } else {
+            suggestionBox.innerHTML = '<div class="suggestion-item text-dark p-2">No results found</div>';
+        }
+    } catch (err) {
+        console.error('Error fetching suggestions:', err);
+    }
+}

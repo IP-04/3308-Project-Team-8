@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS books (
 	author VARCHAR(200),
 	thumbnail_link VARCHAR(200),
 	avg_rating FLOAT,
+	rating_count INT,
 	description VARCHAR(5000),
 	sample VARCHAR(5000),
 	purchase_link VARCHAR(200),
