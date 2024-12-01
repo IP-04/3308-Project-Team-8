@@ -327,6 +327,24 @@ app.get('/login', (req, res) => {
   res.render('pages/login');
 });
 
+// login route helper - db init data insertion verification
+async function booksRelationInsertion() {
+  
+  const reviews = await db.any('SELECT * FROM reviews;');
+  reviews.forEach(async review => {
+    console.log(review);
+    const curr_review = await db.oneOrNone('SELECT * FROM books WHERE google_volume = $1;', [review.google_volume]);
+    if (!curr_review) { // If a book with this google_volume doesn't exist, change the book the review is for
+      const new_review = await db.one('SELECT google_volume FROM books WHERE id = $1;',[Math.floor(Math.random() * 159) + 1]); // prevent looking for id 0
+      await db.none('UPDATE reviews SET google_volume = $1 WHERE google_volume = $2;',[new_review.google_volume, review.google_volume]);
+      await db.none('UPDATE reviews_to_books SET google_volume = $1 WHERE google_volume = $2;', [new_review.google_volume, review.google_volume]);
+      //await db.none(`UPDATE books SET avg_rating = 0 WHERE avg_rating IS NULL;`);
+      await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $1) WHERE google_volume = $1;',[new_review.google_volume]);
+      
+    }
+  });
+}
+
 // login submission route
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -403,6 +421,7 @@ app.post('/login', async (req, res) => {
             res.status(500).send('Database failed to populate');
           });
         }
+        await booksRelationInsertion();
       }
 
       res.status(302).redirect('/home'); // redirecet to home after populating database
