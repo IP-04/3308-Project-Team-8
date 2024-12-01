@@ -119,6 +119,7 @@ nav {
     --bs-btn-border-color: #d19c1d;
     --bs-btn-hover-bg: #d98324;
     --bs-btn-hover-border-color: #d98324;
+    text-align: center;
 }
 
 .btn-secondary {

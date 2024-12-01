@@ -186,8 +186,21 @@ async function hasNotReviewed(username, google_volume) {
     .then(data => {
         
         console.log(data);
+        const bubble = document.getElementById('alert-bubble');
+        const button = document.getElementById('review-button');
         if (data.has_not_reviewed) {
-          openReviewModal();
+            button.style.display = "grid";
+            bubble.style.display = "none";
+            openReviewModal();
+        } else {
+            button.style.display = "none";
+            bubble.style.display = "grid";
+
+            setTimeout(() => {
+                
+                button.style.display = "grid";
+                bubble.style.display = "none";
+            }, 3000);
         }
     })
     .catch(err => {
