@@ -7,12 +7,8 @@ let NEW_REVIEW;
 
 // Creates card to fill with review information
 function createBootstrapCard(id) {
-    // Use `document.createElement()` function to create a `div`
     var card = document.createElement('li');
-      // Let's add some bootstrap classes to the div to upgrade its appearance
-      // This is the equivalent of <div class="col-sm m-1 bg-white rounded px-1 px-md-2"> in HTML
-      (card.className = 'card m-1 bg-light rounded px-1 px-md-2');
-    // This the equivalent of <div id="monday"> in HTML
+    card.className = 'card m-1 bg-light rounded px-1 px-md-2';
     card.id = 'review_card_' + id;
     return card;
 }
@@ -48,14 +44,14 @@ function createReviewDesc(text) {
 // intialize the review-generating system
 function initializeReviews(reviews) {
     
-    REVIEWS = reviews;
+    REVIEWS = reviews; // update global variable to current state of database
     REVIEW_COUNT = reviews.length;
     initializeReviewModal(); // initialize bootstrap modal
 
     var max_reviews;
-    if (reviews == undefined) {
+    if (reviews == undefined) { // logic to determien max_reviews to display
         max_reviews = 0;
-    } else if (reviews.length < 6) {
+    } else if (reviews.length < 6) { // verifies that max_reviews = num of reviews, limit of 6
         max_reviews = reviews.length;
     } else {
         max_reviews = 6;
@@ -66,13 +62,11 @@ function initializeReviews(reviews) {
 }
 
 function initializeReviewModal() {
-    // Create a modal using JS. The id will be `review-modal`:
-    // Reference: https://getbootstrap.com/docs/5.3/components/modal/#via-javascript
+    // sets global variable modal
     REVIEW_MODAL = new bootstrap.Modal(document.getElementById('review-modal'));
 }
-function openReviewModal() { // when form is opened to leave a review
+function openReviewModal() { // display form to leave a review
     REVIEW_FORM = document.getElementById('review-form');
-    //REVIEW_FORM.setAttribute("onsubmit", `javascript:updateReviewsFromModal()`);
     REVIEW_MODAL.show();
 }
 function closeReviewModal() { // when cancel button is clicked
@@ -85,7 +79,7 @@ function updateReviewsFromModal() {
     REVIEW_COUNT++;
 
     let id = REVIEW_COUNT;
-    
+    // collect inputs from form
     let google_volume = document.getElementById('review_google_vol').value;
     let title = document.getElementById('review_title').value;
     let description = document.getElementById('review_desc').value;
@@ -94,7 +88,7 @@ function updateReviewsFromModal() {
     let username = document.getElementById('review_username').value;
     
 
-    NEW_REVIEW = [{
+    NEW_REVIEW = [{ // create global new review object
         id: id,
         username: username,
         google_volume: google_volume,
@@ -104,14 +98,14 @@ function updateReviewsFromModal() {
         visibility: visibility,
     }]
     
-    REVIEWS[REVIEW_COUNT-1] = NEW_REVIEW;
-    console.log(REVIEW_COUNT);
-    console.log(REVIEWS);
+    REVIEWS[REVIEW_COUNT-1] = NEW_REVIEW; // add review to global array
+    //console.log(REVIEW_COUNT);
     //console.log(REVIEWS);
-    updateDOM();
-    REVIEW_MODAL.hide();
+    //console.log(REVIEWS);
+    updateDOM(); // update webpage display
+    REVIEW_MODAL.hide(); // hide the modal
     
-    fetch('/addReview', {
+    fetch('/addReview', { // send user inputs to populate in the database
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -128,32 +122,32 @@ function updateReviewsFromModal() {
 
 // update display of reviews
 function updateDOM() {
-    console.log(REVIEWS[0]);
-    const container = document.getElementById('review-list');
-    console.log(container);
+    //console.log(REVIEWS[0]);
+    const container = document.getElementById('review-list'); // parent element of listed items
+    //console.log(container);
 
-    if (MAX_REVIEWS < 6) {MAX_REVIEWS = REVIEW_COUNT}
+    if (MAX_REVIEWS < 6) {MAX_REVIEWS = REVIEW_COUNT} // if number of reviews is not at maximum of 6
 
-    if (REVIEWS[0] == undefined) {
+    if (REVIEWS[0] == undefined) { // check if array is empty (no reviews yet)
         var no_reviews = createReviewTitle('No reviews for this book yet. Be the first to review!', null);
         container.appendChild(no_reviews);
         return;
     }
-    for (let i = 0; i < MAX_REVIEWS; i++) {
-        const empty_reviews = document.getElementById('empty-reviews');
-        if (empty_reviews) {empty_reviews.remove()}
-        console.log(REVIEWS[i]);
+    for (let i = 0; i < MAX_REVIEWS; i++) { //append each review
+        const empty_reviews = document.getElementById('empty-reviews'); 
+        if (empty_reviews) {empty_reviews.remove()} // remove empty reviews text if present
+        //console.log(REVIEWS[i]);
         var current_review = REVIEWS[i];
         if(NEW_REVIEW == current_review) {current_review = current_review[0]} // this removes a weird json parsing artifact from the data
-        console.log(current_review);
+        //console.log(current_review);
 
         var review_card = document.getElementById('review_card_' + current_review.id);
-        console.log(review_card);
-        if (review_card != null) {
+        //console.log(review_card);
+        if (review_card != null) { // if card already exists, remove it
             review_card.remove();
         }
 
-        if(current_review.visibility) {
+        if(current_review.visibility) { // check if user selected public visibility before appending
             var card = createBootstrapCard(current_review.id);
 
             container.appendChild(card);
@@ -167,13 +161,13 @@ function updateDOM() {
             var card_desc = createReviewDesc(current_review.rev_description);
             card.appendChild(card_desc);
 
-            console.log(card);
+            //console.log(card);
         }
     }
 }
 
 async function hasNotReviewed(username, google_volume) {
-    
+    // check if user review exists in database
     await fetch('/hasNotReviewed?username=' + username + '&google_volume=' + google_volume, {
         method: 'GET',
         headers: {
@@ -185,8 +179,8 @@ async function hasNotReviewed(username, google_volume) {
     })
     .then(data => {
         
-        console.log(data);
-        const bubble = document.getElementById('alert-bubble');
+        //console.log(data);
+        const bubble = document.getElementById('alert-bubble'); // display alert bubble for 3s if lready left a review
         const button = document.getElementById('review-button');
         if (data.has_not_reviewed) {
             button.style.display = "grid";
@@ -211,22 +205,23 @@ async function hasNotReviewed(username, google_volume) {
 function addFriend(user_id, profile_id, user_username, profile_username) {
     const friend_button_parent = document.getElementById('friend-form');
     const friend_button = document.getElementById('friend-button');
-    friend_button.innerHTML = 'Remove '+ profile_username + ' from Friends';
-    friend_button_parent.onsubmit = function (event) {
+    friend_button.innerHTML = 'Remove '+ profile_username + ' from Friends'; // toggle button text
+    friend_button_parent.onsubmit = function (event) { // toggle button onsubmit action
         event.preventDefault(); // Prevent form submission
-        removeFriend(user_id, profile_id, user_username, profile_username);
+        removeFriend(user_id, profile_id, user_username, profile_username); 
         return false;
     }
     const friend_list = document.getElementById('friend-list');
     const new_friend = document.createElement('li');
     new_friend.className = 'card friend-card bg-light h-100 text-center py-2';
     new_friend.id = user_id;
-    friend_list.appendChild(new_friend);
+    friend_list.appendChild(new_friend); // display new friend
     const new_friend_username = document.createElement('a');
     new_friend_username.className = 'h6';
     new_friend_username.innerHTML = user_username;
     new_friend.appendChild(new_friend_username);
 
+    //add friend to database
     fetch('/addFriend', {
         method: 'POST',
         headers: {
@@ -239,24 +234,25 @@ function addFriend(user_id, profile_id, user_username, profile_username) {
     });
 }
 
-function removeFriend(user_id, profile_id, user_username, profile_username) {
+function removeFriend(user_id, profile_id, user_username, profile_username) { // basically the same as addFriend but vice versa
     const friend_button_parent = document.getElementById('friend-form');
     const friend_button = document.getElementById('friend-button');
-    friend_button.innerHTML = 'Add ' + profile_username + ' to Friends';
-    friend_button_parent.onsubmit = function (event) {
+    friend_button.innerHTML = 'Add ' + profile_username + ' to Friends'; // toggle button text
+    friend_button_parent.onsubmit = function (event) { // toggle button onsubmit action
         event.preventDefault(); // Prevent form submission
         addFriend(user_id, profile_id, user_username, profile_username);
         return false;
     }
-    const old_friend = document.getElementById(user_id);
+    const old_friend = document.getElementById(user_id); // remove old friend
     old_friend.remove();
-    if (document.querySelector(".friend-card") == null) {
+    if (document.querySelector(".friend-card") == null) { // if the friend list is now empty, add display text
         const list = document.getElementById('friend-list');
         list.appendChild('h5');
         list.className('text-center');
         list.innerHTML('No friends yet!')
     }
 
+    // remove friend in databse
     fetch('/removeFriend', {
         method: 'POST',
         headers: {
@@ -271,7 +267,7 @@ function removeFriend(user_id, profile_id, user_username, profile_username) {
 
 let PROFILE_MODAL;
 function openProfileModal() {
-    PROFILE_MODAL = new bootstrap.Modal(document.getElementById('profile-modal'));
+    PROFILE_MODAL = new bootstrap.Modal(document.getElementById('profile-modal')); // define and open modal
     PROFILE_MODAL.show();
 }
 function closeProfileModal() { // when cancel button is clicked
@@ -280,16 +276,17 @@ function closeProfileModal() { // when cancel button is clicked
 function updateProfileFromModal() {
     const new_desc = document.getElementById('profile-desc').value;
 
-    const desc_element = document.getElementById('html-desc-div');
+    const desc_element = document.getElementById('html-desc-div'); // parent element of desc
     const html_desc = document.getElementById('html-desc');
-    if (html_desc != null) {html_desc.remove();}
+    if (html_desc != null) {html_desc.remove();} // remove old desc
 
     var new_desc_element = document.createElement('p');
     new_desc_element.innerHTML = new_desc;
     new_desc_element.id = 'html-desc';
 
-    desc_element.appendChild(new_desc_element);
+    desc_element.appendChild(new_desc_element); // add new desc
 
+    //update description in database
     fetch('/editDesc', {
         method: 'PUT',
         headers: {
@@ -297,7 +294,7 @@ function updateProfileFromModal() {
         },
         body: JSON.stringify({description: new_desc})
     });
-    closeProfileModal();
+    closeProfileModal(); // hide modal
 }
 
 //function to change visibility of the password on click

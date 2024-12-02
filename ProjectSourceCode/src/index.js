@@ -251,11 +251,15 @@ app.get('/profile', async (req, res) => {
   var description = profile.description;
   const profile_id = profile.id;
   const user_id = logged_in_user.id;
+  // collect up to 15 reviews in rating DESC order
   const reviews = await db.any('SELECT * FROM reviews INNER JOIN reviews_to_books ON reviews.id = review_id INNER JOIN books ON reviews_to_books.google_volume = books.google_volume WHERE username = $1 GROUP BY books.id, reviews.id, reviews_to_books.review_id, reviews_to_books.google_volume, books.google_volume ORDER BY rating DESC LIMIT 15;', [username]);
+  // collect up to 10 friends
   const friends = await db.any('SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 10;',[profile.id]);
+  // select up to 4 books from particular user where avg_rating > 3.0
   const liked_books = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.google_volume = reviews_to_books.google_volume INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 AND books.avg_rating > 3.0 LIMIT 4;', [username]);
+  // select books from particular user in id DESC order (recent to oldest)
   const recently_read = await db.any('SELECT * FROM books INNER JOIN reviews_to_books ON books.google_volume = reviews_to_books.google_volume INNER JOIN reviews ON reviews_to_books.review_id = reviews.id WHERE reviews.username = $1 GROUP BY books.id, reviews.id, reviews_to_books.review_id, reviews_to_books.google_volume, books.google_volume ORDER BY reviews.id DESC LIMIT 4;', [username])
-  const is_my_profile = (username == logged_in_user.username);
+  const is_my_profile = (username == logged_in_user.username); // parameter passed for html display options
   var is_friend = false;
   friends.forEach(friend => { // determines is the logged in user is on the profile's friend list
     if (!is_friend) { // only check when is_friend is false
@@ -336,9 +340,10 @@ async function booksRelationInsertion() {
     const curr_review = await db.oneOrNone('SELECT * FROM books WHERE google_volume = $1;', [review.google_volume]);
     if (!curr_review) { // If a book with this google_volume doesn't exist, change the book the review is for
       const new_review = await db.one('SELECT google_volume FROM books WHERE id = $1;',[Math.floor(Math.random() * 159) + 1]); // prevent looking for id 0
+      // update db tables accordingly
       await db.none('UPDATE reviews SET google_volume = $1 WHERE google_volume = $2;',[new_review.google_volume, review.google_volume]);
       await db.none('UPDATE reviews_to_books SET google_volume = $1 WHERE google_volume = $2;', [new_review.google_volume, review.google_volume]);
-      //await db.none(`UPDATE books SET avg_rating = 0 WHERE avg_rating IS NULL;`);
+      
       await db.none('UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = $1) WHERE google_volume = $1;',[new_review.google_volume]);
       
     }
@@ -421,7 +426,7 @@ app.post('/login', async (req, res) => {
             res.status(500).send('Database failed to populate');
           });
         }
-        await booksRelationInsertion();
+        await booksRelationInsertion(); // calls helper function to propogate db values dependent on the newly inserted books data
       }
 
       res.status(302).redirect('/home'); // redirecet to home after populating database
@@ -480,7 +485,7 @@ app.get('/book', (req, res) => {
 
 // fetch book details route
 app.get('/book/:id', async (req, res) => {
-  const book_google_vol = `${req.params.id}`;
+  const book_google_vol = `${req.params.id}`; // funky but it works
   const user = req.session.user;
   const username = user.username;
   try {
@@ -552,15 +557,6 @@ app.get('/reviews/:id', async (req, res) => {
   res.render('pages/reviews', {user, reviews}); 
 });
 
-//load search results
-/*let SEARCH_RESULTS = null;
-app.get('/search', (req, res) => {
-  if (SEARCH_RESULTS) {
-    res.render('pages/book', {books: SEARCH_RESULTS}); 
-  } else {
-    res.redirect('pages/home'); // redirects invalid path to home
-  }
-});*/
 
 // search for books
 // Updated Search Route
