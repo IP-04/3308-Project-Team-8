@@ -229,7 +229,7 @@ app.get('/discover', async (req, res) => {
       }); 
 
       const discoverUsers = await db.any(
-        'SELECT username, id FROM profiles WHERE username != $1 ORDER BY RANDOM() LIMIT 6;',
+        'SELECT username, id FROM profiles WHERE username != $1 ORDER BY RANDOM() LIMIT 5;',
         [username]  
       );
 
