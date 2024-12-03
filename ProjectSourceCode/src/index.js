@@ -213,14 +213,65 @@ app.get('/discover', async (req, res) => {
     try {
       // Query for the most recent books, ordered by publish_date
       const newReleases = await db.any(
-        'SELECT id, book_title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6;'
+        'SELECT id, book_title, author, thumbnail_link, publish_date, google_volume FROM books ORDER BY publish_date DESC LIMIT 6'
       );
-  
+      newReleases.forEach((book) => {
+        const publishDate = new Date(book.publish_date);
+        
+        // Format date as "Oct 26 2023"
+        const formattedDate = publishDate.toLocaleDateString('en-US', {
+          month: 'short',  // "Oct"
+          day: 'numeric',  // "26"
+          year: 'numeric', // "2023"
+        });
+
+        book.publish_date = formattedDate;
+      }); 
+
+      const discoverUsers = await db.any(
+        'SELECT username, id FROM profiles WHERE username != $1 ORDER BY RANDOM() LIMIT 6;',
+        [username]  
+      );
+
+      const friends = await db.any(
+        'SELECT * FROM friends INNER JOIN profiles ON profiles.id = friends.friend_id WHERE friends.user_id = $1 GROUP BY profiles.username, profiles.id, friends.user_id, friends.friend_id LIMIT 3;',
+        [user.id]
+      );
+
+      let recommendedBooks = [];
+
+     for (const friend of friends) {
+      const friendUsername = friend.username;
+      
+      const recentlyRead = await db.any(
+        'SELECT books.id, books.book_title, books.author, books.thumbnail_link, books.publish_date, books.google_volume ' +
+        'FROM books ' +
+        'INNER JOIN reviews_to_books ON books.google_volume = reviews_to_books.google_volume ' +
+        'INNER JOIN reviews ON reviews_to_books.review_id = reviews.id ' +
+        'WHERE reviews.username = $1 ' +
+        'ORDER BY RANDOM() LIMIT 2;',
+        [friendUsername]
+      );
+      
+      recommendedBooks = recommendedBooks.concat(recentlyRead);
+    }
+
+      const wishlistBooks = await db.any(
+          'SELECT books.* FROM books ' +
+          'INNER JOIN wishlist ON books.google_volume = wishlist.google_volume ' +
+          'WHERE wishlist.user_id = $1',
+          [user.id]
+      );
       res.render('pages/discover', {
         user: user,
         username: username,
         newReleases: newReleases, 
+        discoverUsers: discoverUsers,
+        recommendedBooks: recommendedBooks, 
+        wishlist: wishlistBooks
       });
+
+
     } catch (error) {
       // Handle errors during the database query
       console.log(error);
@@ -232,6 +283,53 @@ app.get('/discover', async (req, res) => {
   }  
 
 });
+
+//add to wishlist (future reads section discover page)
+app.post('/addWishlist', async (req, res) => {
+  const user = req.session.user;
+
+  if (user) {
+      try {
+          const { google_volume } = req.body;
+          await db.none(
+              'INSERT INTO wishlist (user_id, google_volume) VALUES ($1, $2)ON CONFLICT (user_id, google_volume) DO NOTHING',
+              [user.id, google_volume]
+          );
+          res.redirect('/discover');
+      } catch (error) {
+          console.log(error);
+          res.status(500).send('Error adding book to wishlist');
+      }
+  } else {
+      res.status(302);
+      res.redirect('/login');
+  }
+});
+
+// Remove from wishlist
+app.post('/removeWishlist', async (req, res) => {
+  const user = req.session.user;
+
+  if (user) {
+    try {
+      const { google_volume } = req.body;
+
+      await db.none(
+        'DELETE FROM wishlist WHERE user_id = $1 AND google_volume = $2',
+        [user.id, google_volume]
+      );
+
+      res.redirect('/discover');
+    } catch (error) {
+      console.log(error);
+      res.status(500).send('Error removing book from wishlist');
+    }
+  } else {
+    res.status(302);
+    res.redirect('/login');
+  }
+});
+
 
 
 // Profile route (w/ determine user page)

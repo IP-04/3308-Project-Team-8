@@ -30,6 +30,9 @@ this is used in the index.js function when parsin in the published date*/
 CREATE OR REPLACE FUNCTION convert_partial_date(text)
 RETURNS DATE AS $$
 BEGIN
+	IF $1 IS NULL THEN
+        RETURN '2000-01-01'::DATE;
+    END IF;
     IF $1 ~ '^\d{4}$' THEN
         RETURN ($1 || '-01-01')::DATE;
     ELSIF $1 ~ '^\d{4}-\d{2}$' THEN
@@ -70,4 +73,10 @@ CREATE TABLE IF NOT EXISTS reviews_to_books (
 CREATE TABLE IF NOT EXISTS reviews_to_profiles (
 	review_id SMALLINT,
 	profile_id SMALLINT
+);
+
+CREATE TABLE IF NOT EXISTS wishlist (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    google_volume VARCHAR(12) NOT NULL,
+    PRIMARY KEY (user_id, google_volume)
 );

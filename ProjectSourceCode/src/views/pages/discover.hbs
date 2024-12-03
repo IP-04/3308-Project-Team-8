@@ -1,30 +1,55 @@
 {{!-- discover.hbs --}}
 
 <main class="ms-3">
-    <section class="recommendations">
-        <h4>Recommended Books | Based on Your Interests & Friends</h4>
+    <section class="Discover Users">
+        <h2>🔍 Discover Other Users</h2>
+        <div class="d-flex flex-wrap justify-content-center">
+            {{#if discoverUsers.length}}
+                {{#each discoverUsers}}
+                    <div class="card m-2 p-2 text-center" style="width: 12rem;">
+                        <img 
+                            src="https://ui-avatars.com/api/?name={{this.username}}&background=random&size=128" 
+                            alt="Profile Icon" 
+                            class="rounded" {{!if you prefere square just romove -circle part }}
+                            style="width: 80px; height: 80px; object-fit: cover;">
+                        <h5 class="mt-2">{{this.username}}</h5>
+                        <a href="/profile/{{this.username}}" class="btn btn-primary btn-sm">View Profile</a>
+                    </div>
+                {{/each}}
+            {{else}}
+                <p style="font-size: 20px;"> No other profiles available.🏜</p>
+            {{/if}}
+        </div>
+    </section>
 
-        {{#if recommendations.length}}
-            <ul>
-                {{#each recommendations}}
-                    <li class="book-card">
-                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
-                        <div class="book-info">
-                            <h3>{{this.title}}</h3>
-                            <p>{{this.author}}</p>
-                            <p><strong>Genre:</strong> {{this.genre}}</p>
-                            <p>{{this.description}}</p>
+    <section class="recommendations">
+        <h2>📚See what your friends have read</h2>
+        
+        {{#if recommendedBooks.length}} <!-- Check if there are recommended books -->
+            <ul class="row">
+                {{#each recommendedBooks}} 
+                    <li class="col-2 d-flex justify-content-center">
+                        <div class="card book-card bg-1 h-100">
+                            <img src="{{this.thumbnail_link}}" alt="{{this.book_title}} Cover" class="card-img-top book-cover">
+                            <div class="card-body book-info bg-light rounded-bottom d-flex flex-column">
+                                <h5 class="card-title" style="font-weight: normal;"><span style="font-weight: bold;">Title:</span> {{this.book_title}}</h5>
+                                <a href="/book/{{this.google_volume}}" class="btn btn-primary btn-sm">View Details</a> 
+                                 <form action="/addWishlist" method="POST">
+                                <input type="hidden" name="google_volume" value="{{this.google_volume}}">
+                                <button  type="submit" class="btn btn-primary btn-sm mt-2">Save to Reads</button>
+                            </form>
+                            </div>
                         </div>
                     </li>
                 {{/each}}
             </ul>
         {{else}}
-            <p>No recommendations available.</p>
+            <p style="font-size: 20px;">No one's reading yet 😔- Connect with friends to get book suggestions!👥📚</p>
         {{/if}}
     </section>
-     <section class="newReleases">
-        <h4>New Releases</h4>
 
+     <section class="newReleases">
+        <h2>🗓New Releases</h2>
         {{#if newReleases.length}}
             <ul class="row">
                 {{#each newReleases}}
@@ -32,10 +57,13 @@
                         <div class="card book-card bg-1 h-100">
                             <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
                             <div class="card-body book-info bg-light rounded-bottom">
-                                <h5 class="card-title">{{this.title}}</h5>
-                                <p class="card-text">{{this.author}}</p>
-                                {{!-- <p class="card-text">{{this.publish_date}}</p> will fix publish date format--}}
-                                <a href="/book/{{this.id}}" class="btn btn-primary">View Details</a>
+                                <p><strong>Published:</strong>{{this.publish_date}}</p> 
+                                <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
+                            <form action="/addWishlist" method="POST">
+                                <input type="hidden" name="google_volume" value="{{this.google_volume}}">
+                                <button  type="submit" class="btn btn-primary btn-sm mt-2">Save to Reads</button>
+                            </form>
+
                             </div>
                         </div>
                     </li>
@@ -45,45 +73,33 @@
             <p>No new releases available.</p>
         {{/if}}
     </section>
-    <section class="trending">
-        <h4>Trending Books</h4>
-
-        {{#if trendingBooks.length}}
-            <ul>
-                {{#each trendingBooks}}
-                    <li class="book-card">
-                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
-                        <div class="book-info">
-                            <h3>{{this.title}}</h3>
-                            <p>{{this.author}}</p>
-                            <p>{{this.description}}</p>
-                        </div>
-                    </li>
-                {{/each}}
-            </ul>
-        {{else}}
-            <p>No trending options available.</p>
-        {{/if}}
-    </section>
+  
     <section class="Wishlist">
-        <h4>Your Wishlist | Books Saved by You</h4>
-
+        <h2>🔮Future Reads</h2>
         {{#if wishlist.length}}
-            <ul>
+            <ul class="row">
                 {{#each wishlist}}
-                    <li class="book-card">
-                        <img src="{{this.cover_image}}" alt="{{this.title}} Cover" class="book-cover">
-                        <div class="book-info">
-                            <h3>{{this.title}}</h3>
-                            <p>{{this.author}}</p>
-                            <p><strong>Genre:</strong> {{this.genre}}</p>
-                            <p>{{this.description}}</p>
+                    <li class="col-2 d-flex justify-content-center">
+                        <div class="card book-card bg-1 h-100">
+                            <img src="{{this.thumbnail_link}}" alt="{{this.title}} Cover" class="card-img-top book-cover">
+                            <div class="card-body book-info bg-light rounded-bottom">
+                            <h5 class="card-title" style="font-weight: normal;"><span style="font-weight: bold;">Title:</span> {{this.book_title}}</h5>
+                            <p><strong>Author:</strong>{{this.author}}</p>
+                            <a href="/book/{{this.google_volume}}" class="btn btn-primary">View Details</a>
+                            <form action="/removeWishlist" method="POST">
+                            <input type="hidden" name="google_volume" value="{{this.google_volume}}">
+                            <button type="submit" class="btn btn-secondary btn-sm mt-2">Unsave Book</button>
+                        </form>
+                            </div>
                         </div>
                     </li>
                 {{/each}}
             </ul>
         {{else}}
-            <p>Wishlist is empty.</p>
+            <p style="font-size: 20px;"></pstyle>🛸Your Future Reads List is Empty. Start Adding Books! 📚</p>
         {{/if}}
     </section>
+        <section><br></section>
+        <section><br></section> <!--  padding added to prevent footer overlap   -->
+        <section><br></section>
 </main>
