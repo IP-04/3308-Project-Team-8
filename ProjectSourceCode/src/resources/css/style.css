@@ -6,11 +6,9 @@ body {
     color: #363020;
   }
 
-form {
-    background-color: #f1f7ed;
-    color: #363020;
-    border: 4px solid #d19c1d;
-    padding: 20px;
+form {/*for add to wishlisht button*/
+    margin: 0;
+    padding: 0;
 }
 
 footer {
@@ -23,6 +21,11 @@ nav {
     background-color: #d19c1d;
     color: #363020;
     padding: 0.5rem 1rem; /* Adjust navbar padding for batter spacing */
+}
+
+.style-form {
+    border: 4px solid #d19c1d;
+    padding: 20px;
 }
 
 .navbar {
