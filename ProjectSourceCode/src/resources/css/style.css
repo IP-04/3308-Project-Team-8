@@ -23,6 +23,11 @@ nav {
     padding: 0.5rem 1rem; /* Adjust navbar padding for batter spacing */
 }
 
+.style-form {
+    border: 4px solid #d19c1d;
+    padding: 20px;
+}
+
 .navbar {
     display: flex;
     justify-content: space-between; /* Ensure logo and links are spaced correctly */

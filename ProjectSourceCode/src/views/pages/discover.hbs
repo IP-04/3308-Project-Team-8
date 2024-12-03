@@ -34,7 +34,7 @@
                             <div class="card-body book-info bg-light rounded-bottom d-flex flex-column">
                                 <h5 class="card-title" style="font-weight: normal;"><span style="font-weight: bold;">Title:</span> {{this.book_title}}</h5>
                                 <a href="/book/{{this.google_volume}}" class="btn btn-primary btn-sm">View Details</a> 
-                                 <form action="/addWishlist" method="POST">
+                                 <form action="/addWishlist" method="POST" style="border: none; padding: 0px">
                                 <input type="hidden" name="google_volume" value="{{this.google_volume}}">
                                 <button  type="submit" class="btn btn-primary btn-sm mt-2">Save to Reads</button>
                             </form>
