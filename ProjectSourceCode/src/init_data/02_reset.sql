@@ -13,6 +13,6 @@ DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS users_to_profiles;
 DROP TABLE IF EXISTS reviews_to_books;
-DROP TABLE IF EXISTS profiles_to_books;
 DROP TABLE IF EXISTS reviews_to_profiles;
+DROP TABLE IF EXISTS wishlist;
 */

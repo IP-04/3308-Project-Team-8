@@ -1,5 +1,7 @@
 /* run this after populating cloud/local db, otherwise avg_rating won't be calculated*/
 
+/* THIS FILE IS OUTDATED AND NO LONGER NEEDED. IT IS KEPT HERE AS AN ARCHIVE JUST IN CASE */
+
 /*
 UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = 'xD9LEAAAQBAJ') WHERE google_volume = 'xD9LEAAAQBAJ';
 UPDATE books SET avg_rating = (SELECT AVG(rating) FROM reviews WHERE google_volume = 'l-LoEAAAQBAJ') WHERE google_volume = 'l-LoEAAAQBAJ';

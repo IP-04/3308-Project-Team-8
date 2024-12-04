@@ -61,12 +61,12 @@
 
             </div>
             <div class="row justify-content-end" style="padding: 10px; height: 6rem">
-                <button class="btn col-2 btn-primary text-center" href="{{book.purchase_link}}">Buy Now</button>
+                <a class="btn col-2 btn-primary text-center" href="{{book.purchase_link}}">Buy Now</a>
                 <div class="col-1"></div>
                 <button class="btn col-2 btn-primary text-center align-items-center" id="review-button" onclick="hasNotReviewed('{{username}}','{{book.google_volume}}')">Leave a Review</button>
                 <p class="text-center card col-2 bg-2" id="alert-bubble" style="display: none">You have already reviewed this book!</p>
                 <div class="col-1"></div>
-                <button href="/reviews/{{book.google_volume}}" class="btn col-2 btn-primary text-center">View all Reviews</button>
+                <a href="/reviews/{{book.google_volume}}" class="btn col-2 btn-primary text-center">View all Reviews</a>
                 <div class="col-1"></div>
             </div>
             <div class="row">
