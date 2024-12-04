@@ -11,6 +11,10 @@ form {/*for add to wishlisht button*/
     padding: 0;
 }
 
+a {
+    align-items: center;
+}
+
 footer {
     background-color: #d98324;
     color: #363020;
