@@ -44,11 +44,12 @@ Follow these steps to run BookHive locally:
 
 1. Ensure Dependencies are Installed
 
-ou can do this by running: npm install
+you can do this by running: npm install
 
 2. Set Up Environment Variables
 
-Ensure that the required environment variables are set up in a .env file in the ProjectSourceCode directory. The .env file should contain the following variables:
+Ensure that the required environment variables are set up in a .env file in the ProjectSourceCode directory. 
+The .env file should contain the following variables:
 
 # database credentials
 POSTGRES_USER="postgres"
@@ -66,4 +67,5 @@ Use the npm test command to run the tests.
 npm test
 
 ## Link to the deployed application
+
 https://three308-project-team-8.onrender.com/​
